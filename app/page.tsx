@@ -144,6 +144,7 @@ export default async function Index() {
           </p>
         </div>
       </div>
+      <div className="grid-cols-2 grid"></div>
     </div>
   )
 }

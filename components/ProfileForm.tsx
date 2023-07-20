@@ -123,7 +123,7 @@ export default function CustomerForm() {
               </label>
               <input onChange={(e) => setFormState(prev => {return {...prev, company_name: e.target.value}})} type="text" name="company_name" className="rounded-md px-4 py-2 bg-inherit border mb-6"/>
             </div>
-            <button className="bg-[#e8523d] rounded px-4 py-2 text-black mb-6 sm:col-span-full">
+            <button className="bg-[#e8523d] rounded px-4 py-2 text-white mb-6 sm:col-span-full text-lg font-bold">
               Submit
             </button>
           </form>

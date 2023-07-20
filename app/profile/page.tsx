@@ -1,7 +1,7 @@
 import { createServerComponentClient, createServerActionClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import CustomerForm from '@/components/CustomerForm'
+import ProfileForm from '@/components/ProfileForm'
 // import Metadata from 'next'
 
 // export const metadata: Metadata = {
@@ -17,7 +17,7 @@ export default async function ProfileRoute() {
     
     const { data: CustomerData } = await supabase.from('customer').select().eq('user_id', user.id).limit(1).single()
 
-    if(!CustomerData) return <CustomerForm />
+    if(!CustomerData) return <ProfileForm />
     
     return (
       <div className='p-20 bg-white rounded'>
