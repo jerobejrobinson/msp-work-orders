@@ -12,17 +12,18 @@ export const metadata = {
 export default async function RootLayout({ children, }: {children: React.ReactNode}) {
   const supabase = createServerComponentClient({ cookies })
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const { data: admin  } = await supabase.from('admin').select('user_id, first_name').eq('user_id', user?.id).limit(1).single()
+
   return (
     <html lang="en">
       <body
         // suppressHydrationWarning={true}
       >
-        <nav className="w-full flex border-b border-b-foreground/10 h-16 justify-center">
-          <div className="w-full max-w-4xl flex justify-between items-center p-3 text-sm text-foreground">
-            {user ? (
+        <nav className="w-full flex border-b border-b-foreground/10 h-16 justify-center fixed z-50 top-0 bg-white">
+          <div className="w-full max-w-7xl flex justify-between items-center p-3 text-sm text-foreground">
+            {!admin && user && (
               <>
                 <p>{user.email}</p>
                 <div className='flex flex-row items-center gap-4'>
@@ -41,13 +42,28 @@ export default async function RootLayout({ children, }: {children: React.ReactNo
                   <LogoutButton />
                 </div>
               </>
-            ) : (
+            )}
+            {!admin && !user && (
               <Link
                 href="/login"
                 className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover"
               >
                 Login
               </Link>
+            )}
+            {admin && user && (
+              <>
+                <p>{admin.first_name}</p>
+                <div className='flex flex-row items-center gap-4'>
+                  <Link
+                    href="/dashboard"
+                    className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover flex flex-row items-center"
+                  >
+                    Dashboard
+                  </Link>
+                  <LogoutButton />
+                </div>
+              </>
             )}
           </div>
       </nav>

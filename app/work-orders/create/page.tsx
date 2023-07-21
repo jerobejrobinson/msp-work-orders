@@ -76,7 +76,7 @@ export default function Form() {
         }
     }
     return (
-        <div className='w-full bg-background flex flex-col items-center'>
+        <div className='w-full bg-background flex flex-col items-center mt-16'>
             <h1 className="text-xl font-bold text-center p-4">Create New Work Order</h1>
             <form className="flex flex-col gap-4 bg-white p-4 rounded border w-full max-w-4xl" onSubmit={handleWorkOrderSubmission}>
                 <div className="grid grid-cols-1 gap-2">

@@ -1,7 +1,7 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
-import CustomerActions from "./Actions"
+import AdminActions from "./Actions"
 
 interface Note {
     id: string,
@@ -21,11 +21,11 @@ export default async function Order({params}: { params: { slug: string }}) {
         redirect('/login')
     }
 
-    // const { data: customerData } = await supabase.from('customer').select('user_id, id').eq('user_id', user.id).limit(1).single()
+    const { data: admin  } = await supabase.from('admin').select('user_id').eq('user_id', user?.id).limit(1).single()
 
-    // if(!customerData) {
-    //     redirect('/profile')
-    // }
+    if(!admin) {
+        redirect('/')
+    }
 
     const { data: wo } = await supabase.from('work_order').select().eq('id', params.slug).limit(1).single()
 
@@ -34,7 +34,7 @@ export default async function Order({params}: { params: { slug: string }}) {
 
     return (
         <div className="min-h-screen w-full bg-background flex flex-col items-center relative mt-16">
-            <CustomerActions />
+            <AdminActions />
             <div className="w-full max-w-7xl py-8">
                 <p className="text-xl font-bold flex flex-row justify-between">Status</p>
                 {wo.type !== 'test only' ? (

@@ -38,7 +38,7 @@ export default async function WorkOrderPage() {
         )
     }
     return (
-        <div className="min-h-screen w-full bg-background flex flex-col items-center">
+        <div className="min-h-screen w-full bg-background flex flex-col items-center mt-16">
             <div className="w-full max-w-7xl flex justify-between pt-8">
                 <Link
                     href="/"
