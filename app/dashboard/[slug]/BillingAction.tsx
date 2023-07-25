@@ -1,0 +1,32 @@
+'use client'
+
+import Link from "next/link"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useRouter } from "next/navigation"
+export default function BillingAction({billing}: { billing: any }) {
+    const supabase = createClientComponentClient()
+    const router = useRouter()
+
+    const handleDeleteBilling = async () => {
+        if(!billing) return ''
+        const { error } = await supabase.from('billing').delete().eq('id', billing.id)
+        if(error) return console.error(error.message)
+        router.refresh()
+    }
+
+    return (
+        <div className="p-4 relative">
+            {!billing.approved && (
+                <button className="text-main" onClick={handleDeleteBilling}>Click to delete and upload new billing</button>
+            )}
+            <p className="font-bold">Invoice Number</p>
+            <p>{billing.invoice}</p>
+            <p className="font-bold">Amount</p>
+            <p>${billing.amount}</p>
+            <p className="font-bold">Link</p>
+            <Link href={billing.link}>View PDF</Link>
+            <p className="font-bold">Note</p>
+            <p>{billing.notes}</p>
+        </div>
+    )
+}

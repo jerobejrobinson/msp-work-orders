@@ -5,32 +5,36 @@ import { useState } from 'react'
 import { usePathname, useRouter } from "next/navigation"
 import {  } from "next/navigation"
 
-export default function CustomerActions() {
+export default function CustomerActions({wo, customer_id, billing}: {wo: any, customer_id: string, billing: any}) {
     const supabase = createClientComponentClient()
-
-    const wo_id = usePathname()?.split('/')[2]
     const router = useRouter()
+
     const [clicked, setClicked ] = useState<boolean>(false)
     const [note, setNote] = useState<string | null>(null)
-
     const handleNoteClick = () => {
         setClicked(prev => !prev)
     }
-    
     const submitNote = async () => {
-        // get customer id from work order
-        const { data: wo, error: woError } = await supabase.from('work_order').select('customer_id, id').eq('id', wo_id).limit(1).single()
-        
-        if(woError) return woError
-
         // insert note to table with woid and customer id as foreign keys
-        const { error: noteError } = await supabase.from('note').insert({wo_id, customer_id: wo.customer_id, note})
+        const { error: noteError } = await supabase.from('note').insert({wo_id: wo.id, customer_id, note})
 
         if(noteError) return noteError
 
         // handleNoteClick()
         router.refresh()
+    }
 
+    const [ billingClick, setBillingClick ] = useState<boolean>(false)
+    const [ approvalChoice, setApprovalChoice ] = useState<boolean>(false)
+    const handleBillingClick = () => {
+        setBillingClick(prev => !prev)
+    }
+    const submitApproval = async () => {
+        const { error } = await supabase.from('billing').update({approved: approvalChoice, approved_at: new Date().toISOString()}).eq('id', billing.id)
+        if(error) return console.error(error.message)
+
+        handleBillingClick()
+        router.refresh()
     }
     return (
         <div className="w-full max-w-7xl py-8">
@@ -41,21 +45,21 @@ export default function CustomerActions() {
                 >
                     back
                 </Link>
+                <div className="flex flex-row gap-4">
                 {!clicked ? (
-                    <button
-                        className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover flex flex-row items-center"
-                        onClick={handleNoteClick}
-                    >
-                        Add Note
-                    </button>
+                    <BtnAction click={handleNoteClick} name="Note" />
                 ):
-                    <button
-                        className="py-2 px-4 rounded-md no-underline bg-btn-background flex flex-row items-center bg-greenLight text-white"
-                        onClick={submitNote}
-                    >
-                        Submit Note
-                    </button>
+                    <BtnOptions click={handleNoteClick} submit={submitNote} name="Note" />
                 }
+                {!billing ? '' :
+                    billing.approval !== null ? '' : 
+                    wo.type !== 'test only' && !billingClick ? (
+                        <BtnAction click={handleBillingClick} name="Approve Billing" />
+                    ): (
+                        <BtnOptions click={handleBillingClick} submit={submitApproval} name="Billing"/>
+                    )
+                }
+                </div>
             </div>
             {clicked && (
                 <div className="w-full p-4">
@@ -68,6 +72,66 @@ export default function CustomerActions() {
                     ></textarea>
                 </div>
             )}
+            {billingClick && (
+                <div className="w-full p-4 bg-white rounded mt-4 space-y-4">
+                    <Link href={billing.link} className="font-bold">Click To View Bill</Link>
+                    <p>Amount: {billing.amount}</p>
+                    <div>
+                        <label htmlFor="billingTrue">Approve: </label>
+                        <input 
+                            type="radio" 
+                            name="billing" 
+                            id="billingTrue" 
+                            value="true" 
+                            className="w-4 h-4 mr-4" 
+                            onChange={(e) => {
+                                setApprovalChoice(e.target.value === 'true')
+                            }}
+                        />
+                        <label htmlFor="billingFalse">Decline: </label>
+                        <input 
+                            type="radio" 
+                            name="billing" 
+                            id="billingFalse" 
+                            value="false"
+                            className="w-4 h-4"  
+                            onChange={(e) => {
+                                setApprovalChoice(e.target.value === 'true')
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
         </div>
+    )
+}
+
+function BtnOptions({click, submit, name}: {click: any, submit: any, name: string}) {
+    return (
+        <>
+            <button
+                className="py-2 px-4 rounded-md no-underline bg-main hover:bg-btn-background-hover flex flex-row items-center"
+                onClick={click}
+            >
+                Cancel Action
+            </button>
+            <button
+                className="py-2 px-4 rounded-md no-underline bg-btn-background flex flex-row items-center bg-greenLight text-white"
+                onClick={submit}
+            >
+                Submit {name}
+            </button>
+        </>
+    )
+}
+
+function BtnAction({click, name}: {click: any, name: string}) {
+    return (
+        <button
+            className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover flex flex-row items-center"
+            onClick={click}
+        >
+            Add {name}
+        </button>
     )
 }

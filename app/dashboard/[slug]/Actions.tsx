@@ -116,16 +116,30 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
 
         const { data } = await supabase.storage.from('public').getPublicUrl(`${wo.number}/billing/${billingFile.name}`)
 
-        const { error: errorUpload } = await supabase.from('billing').insert({wo_id: wo.id, link: data.publicUrl, notes: billingNotes, admin_id: admin.id, amount: billingAmount, approved: false, invoice: billingInvoice})
+        if(wo.type === 'test only') {
+            const { error: errorUpload } = await supabase.from('billing').insert({wo_id: wo.id, link: data.publicUrl, notes: billingNotes, admin_id: admin.id, amount: billingAmount, approved: true, approved_at: new Date().toISOString(), invoice: billingInvoice})
 
-        if(errorUpload) return console.error(errorUpload.message)
+            if(errorUpload) return console.error(errorUpload.message)
 
-        const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString()}).eq('id', wo.id)
+            const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString()}).eq('id', wo.id)
 
-        if(errorUpdate) return console.error(errorUpdate.message)
+            if(errorUpdate) return console.error(errorUpdate.message)
 
-        handleBillingClick()
-        router.refresh()
+            handleBillingClick()
+            router.refresh()
+        } else {
+            const { error: errorUpload } = await supabase.from('billing').insert({wo_id: wo.id, link: data.publicUrl, notes: billingNotes, admin_id: admin.id, amount: billingAmount, approved: null, invoice: billingInvoice})
+
+            if(errorUpload) return console.error(errorUpload.message)
+
+            const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString()}).eq('id', wo.id)
+
+            if(errorUpdate) return console.error(errorUpdate.message)
+
+            handleBillingClick()
+            router.refresh()
+        }
+        
     }
     
     // End Billing
@@ -163,23 +177,23 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
                     back
                 </Link>
                 <div className="flex flex-row gap-4">
+                {/* Start Add Note Action */}
+                {!noteClicked ? (
+                    <BtnAction click={handleNoteClick} name="Note" />
+                    ):(<BtnOptions click={handleNoteClick} submit={submitNote} name="Note" />)}
+                {/* End Add Note Action */}
                 {/* Start Return Shipping Action */}
                 {wo.return_shipping ? '' : !shippingLabelClick ? (
                     <BtnAction click={handleShippingLabelClick} name="Shipping Label" />
                 ):(<BtnOptions click={handleShippingLabelClick} submit={submitShippingLabel} name="Shipping Label" />)}
                 {/* End Return Shipping Action */}
-                {/* Start Add Note Action */}
-                {!noteClicked ? (
-                    <BtnAction click={handleNoteClick} name="Note" />
-                ):(<BtnOptions click={handleNoteClick} submit={submitNote} name="Note" />)}
-                {/* End Add Note Action */}
                 {/* Start Add Images  */}
                 {wo.number === "pending" ? '' : !imagesBtn ? (
                     <BtnAction click={handleImgBtn} name="Images" />
                 ): (<BtnOptions click={handleImgBtn} submit={submitImages} name="Images" />)}
                 {/* End Add Images  */}
                 {/* Start Add Work Order Number */}
-                {!numberClicked && wo.number === "pending" ? ( 
+                {!wo.return_shipping ? '' : !numberClicked && wo.number === "pending" ? ( 
                     <BtnAction click={handleNumberClick} name="Work Order Number" /> )
                 : wo.number === "pending" ? (<BtnOptions click={handleNumberClick} submit={updateWorkOrderNumber} name="Work Order Number" />) : ('')}
                 {/* End Add Note Action */}
@@ -190,8 +204,10 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
                     : (<BtnOptions click={handleTestClick} submit={handleTestResultSubmission} name="Test Results" />)}
                 {/* End Upload Test Reseults */}
                 {/* Start Upload Billing */}
-                    {testRes?.length && !billingClick ? ( <BtnAction click={handleBillingClick} name="Billing" /> )
-                    : (<BtnOptions click={handleBillingClick} submit={submitBillingInformation} name="Billing" />)}
+                    {!testRes?.length ? '' :
+                    testRes?.length && !billing && !billingClick ? 
+                    ( <BtnAction click={handleBillingClick} name="Billing" /> )
+                    : !billing ? (<BtnOptions click={handleBillingClick} submit={submitBillingInformation} name="Billing" />) : ''}
                 {/* End Upload Billing */}
                 </div>
             </div>

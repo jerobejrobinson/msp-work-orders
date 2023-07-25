@@ -3,6 +3,8 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import AdminActions from "./Actions"
 import Link from "next/link"
+import BillingAction from "./BillingAction"
+
 interface Note {
     id: string,
     created_at: Date,
@@ -24,7 +26,7 @@ interface Billing {
     admin: { first_name: string } | null,
     link: string,
     amount: number,
-    approved: boolean,
+    approved: true | false,
     approved_at: Date,
     invoice: string
 }
@@ -49,7 +51,9 @@ export default async function Order({params}: { params: { slug: string }}) {
 
     const { data: notes }= await supabase.from('note').select(`id, created_at, note, customer ( first_name ), admin ( first_name )`).eq('wo_id', params.slug).returns<[Note]>()
     const { data: test_results }= await supabase.from('test_result').select(`id, created_at, note, link, admin ( first_name )`).eq('wo_id', params.slug).returns<[TestResult]>()
-    const { data: billing }= await supabase.from('billing').select(`id, created_at, note, link, amount, approved, approved_at, admin ( first_name )`).eq('wo_id', params.slug).returns<[Billing]>()
+    
+    const { data: billing, error } = await supabase.from('billing').select('id, created_at, notes, amount, link, approved, approved_at, invoice, admin ( first_name )').eq('wo_id', params.slug).limit(1).returns<[Billing]>().single()
+
 
     const recieved = () => {
         // shipping label has not been submitted
@@ -75,20 +79,31 @@ export default async function Order({params}: { params: { slug: string }}) {
             return ''
         }
     }
+
     const billed = () => {
-        console.log(billing)
         //work order number has been submitted
-        if(billing?.length) {
+        if(billing) {
             return 'bg-greenLight text-white'
         }
-        if(!billing?.length && test_results?.length) {
+        if(!billing && test_results?.length) {
             return 'bg-greenLight text-white animate-pulse'
         } else {
             return ''
         }
     }
 
+    const workInProgress = () => {
+        if(!billing) return ''
+        if(billing.approved) {
+            return 'bg-greenLight text-white'
+        }else {
+            return 'bg-greenLight text-white animate-pulse'
+        }
+    }
 
+    const shipped = () => {
+        
+    }
     return (
         <div className="min-h-screen w-full bg-background flex flex-col items-center relative mt-16">
             <AdminActions wo={wo} testRes={test_results} billing={billing} admin={admin}/>
@@ -100,7 +115,7 @@ export default async function Order({params}: { params: { slug: string }}) {
                         <div className={`p-4 border-l-2 flex justify-center ${recieved()}`}>Received</div>
                         <div className={`p-4 border-l-2 flex justify-center ${tested()}`}>tested</div>
                         <div className={`p-4 border-l-2 flex justify-center ${billed()}`}>Billed</div>
-                        <div className="p-4 border-l-2 flex justify-center">Work In Progress</div>
+                        <div className={`p-4 border-l-2 flex justify-center ${workInProgress()}`}>Work In Progress</div>
                         <div className="p-4 border-l-2 flex justify-center">Shipped</div>
                     </div>
                     ): <div className="grid grid-cols-5 bg-white rounded">
@@ -212,6 +227,20 @@ export default async function Order({params}: { params: { slug: string }}) {
                         <div className=" italic font-light text-3xl p-4 flex flex-row justify-center items-center">
                             No Test Results Available Yet
                         </div>
+                    )}
+                </div>
+            </div>
+            {/* Billing Status */}
+            <div className="w-full max-w-7xl py-8">
+                <p className="text-xl font-bold flex flex-row justify-between">Billing Status</p>
+                <div className="bg-white border rounded">
+                    {!billing  && (
+                        <div className=" italic font-light text-3xl p-4 flex flex-row justify-center items-center">
+                            Billing not available yet
+                        </div>
+                    )}
+                    {billing && (
+                        <BillingAction billing={billing} />
                     )}
                 </div>
             </div>
