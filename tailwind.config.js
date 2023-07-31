@@ -8,6 +8,7 @@ module.exports = {
     extend: {
       colors: {
         main: '#e8523d',
+        mainT20: '#ed7564',
         greenLight: '#90EE90',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',

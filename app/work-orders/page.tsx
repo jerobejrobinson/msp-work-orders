@@ -1,7 +1,9 @@
+import WorkOrderTable from "@/components/WorkOrderTable"
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 import Link from "next/link"
 import { redirect } from "next/navigation"
+
 export default async function WorkOrderPage() {
     const supabase = createServerComponentClient({ cookies })
     const { data: { user } } = await supabase.auth.getUser()
@@ -23,7 +25,8 @@ export default async function WorkOrderPage() {
         )
     }
 
-    const { data: workOrderData } = await supabase.from('work_order').select().eq('customer_id', customerData.id)
+    const { data: workOrderData } = await supabase.from('work_order').select('id, number, type, tracking_number, product_number, return_shipping, created_at, last_update_at').eq('customer_id', customerData.id).order('last_update_at', { ascending: false })
+
     if(!workOrderData) {
         return (
             <div>
@@ -37,34 +40,11 @@ export default async function WorkOrderPage() {
             </div>
         )
     }
+
     return (
-        <div className="min-h-screen w-full bg-background flex flex-col items-center mt-16">
-            <div className="w-full max-w-7xl flex justify-between pt-8">
-                <Link
-                    href="/"
-                    className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover flex flex-row items-center"
-                >
-                    Back
-                </Link>
-                <Link
-                    href="/work-orders/create"
-                    className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover flex flex-row items-center"
-                >
-                    Create New Work Order
-                </Link>
-            </div>
-            <div className="w-full max-w-7xl flex flex-col gap-4 pt-8">
-                {workOrderData.map(wo => (
-                    <Link 
-                        className="bg-white border rounded w-full grid grid-cols-2 p-4"
-                        href={`/work-orders/${wo.id}`}
-                        key={wo.id}
-                    >
-                        <div>{wo.number}</div>
-                        <div>{wo.product_number}</div>
-                    </Link>
-                ))}
-            </div>
-        </div>
+        <>
+            {/* @ts-expect-error Server Component */}
+            <WorkOrderTable data={workOrderData} admin={false}/>
+        </>
     )
 }

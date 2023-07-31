@@ -18,9 +18,7 @@ export default async function RootLayout({ children, }: {children: React.ReactNo
 
   return (
     <html lang="en">
-      <body
-        // suppressHydrationWarning={true}
-      >
+      <body>
         <nav className="w-full flex border-b border-b-foreground/10 h-16 justify-center fixed z-50 top-0 bg-white">
           <div className="w-full max-w-7xl flex justify-between items-center p-3 text-sm text-foreground">
             {!admin && user && (
@@ -67,9 +65,7 @@ export default async function RootLayout({ children, }: {children: React.ReactNo
             )}
           </div>
       </nav>
-      {/* <main className="min-h-screen bg-background flex flex-col items-center "> */}
-        {children}
-      {/* </main> */}
+      {children}
       </body>
     </html>
   )

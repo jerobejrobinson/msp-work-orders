@@ -1,7 +1,24 @@
 'use client'
 import { useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { useRouter } from 'next/navigation'
+import { useRouter, redirect } from 'next/navigation'
+import { Toaster, toast } from 'react-hot-toast';
+
+interface WorkOrder {
+    product_number: string | null,
+    quanity: number | null,
+    part_issues: Array<string>,
+    details: string | null,
+    shipping: 'standard' | 'next day' | null,
+    carrier: 'ups' | 'fedex' | null,
+    type: 'reman' | 'test only' | 'repair' | 'test and r&r' | null,
+    id: string,
+    created_at: Date,
+    last_update_at: Date,
+    return_shipping: string | null,
+    completed_at: Date | null,
+    customer_id: number
+}
 
 export default function Form() {
     const router = useRouter()
@@ -14,7 +31,7 @@ export default function Form() {
         details: String | null,
         shipping: String | null,
         carrier: String | null,
-        type: 'reman' | 'test only' | 'repair' | null
+        type: 'reman' | 'test only' | 'repair' | 'test and r&r' | null
     }>({
         product_number: null,
         quanity: null,
@@ -63,22 +80,33 @@ export default function Form() {
 
         if(!user) return 'not a user'
 
-        const { data: customer } = await supabase.from('customer').select('user_id, id').eq('user_id', user.id).limit(1).single()
+        const { data: customer } = await supabase.from('customer').select('user_id, id, email, first_name, last_name').eq('user_id', user.id).limit(1).single()
  
-        if(!customer) return null
+        if(!customer) return redirect('/profile')
 
-        const { data: workOrderData, error } = await supabase.from('work_order').insert([{...formState, customer_id: customer.id}]).select()
+        const { data: workOrderData, error } = await supabase.from('work_order').insert([{...formState, customer_id: customer.id}]).select().limit(1).single<WorkOrder>()
 
-        console.log(error)
+        if(error) return toast.error(error.message)
+
+        // await fetch('http://localhost:3000/api/email/send-work-order-confirmation', {
+        //     method: 'POST',
+        //     body: JSON.stringify({email: customer.email, name: customer.first_name + ' ' + customer.last_name})
+        // }).then(() => {
+        //     toast.success('email sent')
+        // }).catch(error => {
+        //     toast.error(error)
+        // })
+
         if(workOrderData) {
-            router.push('/work-orders')
+            router.push(`/work-orders/create/successful?id=${workOrderData.id}`)
             router.refresh()
         }
     }
     return (
-        <div className='w-full bg-background flex flex-col items-center mt-16'>
+        <div className='w-full bg-background flex flex-col items-center py-8 mt-16'>
+            <Toaster />
             <h1 className="text-xl font-bold text-center p-4">Create New Work Order</h1>
-            <form className="flex flex-col gap-4 bg-white p-4 rounded border w-full max-w-4xl" onSubmit={handleWorkOrderSubmission}>
+            <form className="flex flex-col gap-4 bg-white p-4 rounded border w-full max-w-4xl shadow" onSubmit={handleWorkOrderSubmission}>
                 <div className="grid grid-cols-1 gap-2">
                     <label htmlFor="part-number" className="text-lg font-bold">Part Number: </label>
                     <input 
@@ -196,7 +224,7 @@ export default function Form() {
                         value="fedex"
                         onChange={handleInputState}
                     />
-                    <label  className="col-span-3" htmlFor="fedex">Fedex</label>
+                    <label  className="col-span-3 cursor-pointer" htmlFor="fedex">Fedex</label>
                     <input 
                         type="radio" 
                         name="carrier" 
@@ -204,7 +232,7 @@ export default function Form() {
                         value="ups"
                         onChange={handleInputState}
                     />
-                    <label  className="col-span-3" htmlFor="ups">UPS</label>
+                    <label  className="col-span-3 cursor-pointer" htmlFor="ups">UPS</label>
                 </div>
                 <div className="grid grid-cols-4 gap-y-2">
                     <p className="text-lg font-bold col-span-4">Select Shipping</p>
@@ -215,7 +243,7 @@ export default function Form() {
                         value="standard"
                         onChange={handleInputState}
                     />
-                    <label  className="col-span-3" htmlFor="standard">Standard Ground (No Charge)</label>
+                    <label  className="col-span-3 cursor-pointer" htmlFor="standard">Standard Ground (No Charge)</label>
                     <input 
                         type="radio" 
                         name="shipping" 
@@ -223,42 +251,53 @@ export default function Form() {
                         value="next day"
                         onChange={handleInputState}
                     />
-                    <label  className="col-span-3" htmlFor="next-day">Expedited Next Day ($50 Upcharge)</label>
+                    <label  className="col-span-3 cursor-pointer" htmlFor="next-day">Expedited Next Day ($50 Upcharge)</label>
                 </div>
-                <div className="grid grid-cols-3 gap-y-2">
-                    <p className="text-lg font-bold col-span-3">Select Work Order Type</p>
-                    <div>
+                <div className="grid grid-cols-4 gap-y-2">
+                    <p className="text-lg font-bold col-span-4">Select Work Order Type</p>
+                    <div className='flex flex-row items-center'>
                         <input 
                             type="radio" 
                             name="type" 
                             id="test-only" 
                             value="test only" 
-                            className=" mr-4"
+                            className="mr-4 w-6 h-6"
                             onChange={handleInputState}
                         />
-                        <label htmlFor="test-only">Test Only</label>
+                        <label htmlFor="test-only" className='cursor-pointer'>Test Only</label>
                     </div>
-                    <div>
+                    <div className='flex flex-row items-center'>
+                        <input 
+                            type="radio" 
+                            name="type" 
+                            id="test-rr" 
+                            value="test and r&r" 
+                            className="mr-4 w-6 h-6"
+                            onChange={handleInputState}
+                        />
+                        <label htmlFor="test-rr" className='cursor-pointer'>Test And R&R</label>
+                    </div>
+                    <div className='flex flex-row items-center'>
                         <input 
                             type="radio" 
                             name="type" 
                             id="repair" 
                             value="repair" 
-                            className="mr-4"
+                            className="mr-4 w-6 h-6"
                             onChange={handleInputState}
                         />
-                        <label htmlFor="repair">Repair</label>
+                        <label htmlFor="repair" className='cursor-pointer'>Repair</label>
                     </div>
-                    <div>
+                    <div className='flex flex-row items-center'>
                         <input 
                             type="radio" 
                             name="type" 
                             id="reman" 
                             value="reman" 
-                            className="mr-4"
+                            className="mr-4 w-6 h-6"
                             onChange={handleInputState}
                         />
-                        <label htmlFor="reman">Reman</label>
+                        <label htmlFor="reman" className='cursor-pointer'>Reman</label>
                     </div>
                 </div>
                 <button type="submit" className="bg-main w-full p-4 text-white text-lg font-bold">

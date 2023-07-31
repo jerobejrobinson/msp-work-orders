@@ -1,10 +1,6 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
 import Link from "next/link"
 
-export default async function WorkOrder() {
-    const supabase = createServerComponentClient({ cookies })
-    const {data: wo} = await supabase.from('work_order').select().eq('id', 'wo_id').limit(1).single()
+export default async function WorkOrder({ wo }: { wo: any}) {
     return (
         <>
             {/* Work Order Details  */}

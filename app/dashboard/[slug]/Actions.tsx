@@ -1,9 +1,10 @@
 'use client'
 import Link from "next/link"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import { useEffect, useState } from 'react'
-import { usePathname, useRouter } from "next/navigation"
-import {  } from "next/navigation"
+import { useState } from 'react'
+import { useRouter } from "next/navigation"
+import { Toaster, toast } from 'react-hot-toast'
+
 
 
 export default function AdminActions({wo, admin, testRes, billing}: {wo: any, admin: any, testRes: any, billing: any}) {
@@ -17,24 +18,33 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
         setShippingLabelClick(prev => !prev)
     }
     const submitShippingLabel = async () => {
-        if(!shippingFile) return "upload file"
+        if(!shippingFile) return toast.error("Need to upload a file before proceeding")
 
-        console.log(shippingFile)
-
+        toast.loading('Uploading document.....')
         // Shipping file naming convention account-number_sl_date
         const { error } = await supabase.storage.from('public').upload(`shipping-labels/${shippingFile.name}`, shippingFile, {
             cacheControl: '3600',
             upsert: false
         })
 
-        if(error) return console.error(error.message)
+        if(error) {
+            toast.dismiss(); 
+            toast.error(error.message)
+            return;
+        }
         
         const { data } = await supabase.storage.from('public').getPublicUrl(`shipping-labels/${shippingFile.name}`)
 
         const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString(), return_shipping: data.publicUrl}).eq('id', wo.id)
 
-        if(errorUpdate) return console.error(errorUpdate.message)
+        if(errorUpdate) {
+            toast.dismiss()
+            toast.error(errorUpdate.message)
+            return;
+        }
 
+        toast.dismiss()
+        toast.success("Shipping label uploaded.")
         handleShippingLabelClick()
         router.refresh()
     }
@@ -46,9 +56,16 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
         setNoteClicked(prev => !prev)
     }
     const submitNote = async () => {
+        if(!note) return toast.error('Must provide a value before sending notes')
         // insert note to table with woid and admin id as foreign keys
         const { error: noteError } = await supabase.from('note').insert({wo_id: wo.id, admin_id: admin.id, note})
-        if(noteError) return noteError
+        if(noteError) {
+            toast.dismiss()
+            toast.error(noteError.message)
+            return;
+        }
+        toast.dismiss()
+        toast.success('Note added')
         handleNoteClick()
         router.refresh()
     }
@@ -60,8 +77,15 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
         setNumberClicked(prev => !prev)
     }
     const updateWorkOrderNumber = async () => {
-        const { error } = await supabase.from('work_order').update({number: number, last_update_at: new Date().toISOString()}).eq('id', wo.id)    
-        if(error) return error
+        if(!number) return toast.error('Must provide a value for work order numbers')
+        const { error } = await supabase.from('work_order').update({number: number, last_update_at: new Date().toISOString()}).eq('id', wo.id)
+        if(error) {
+            toast.dismiss()
+            toast.error(error.message)
+            return;
+        }
+        toast.dismiss()
+        toast.success('Work order number updated')
         handleNumberClick()
         router.refresh()
     }
@@ -74,13 +98,13 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
         setTestClicked(prev => !prev)
     }
     const handleTestResultSubmission = async () => {
-        if(!test) return "upload file"
+        if(!test) return toast.error("Need to upload a file before proceeding")
         const { error } = await supabase.storage.from('public').upload(`${wo.number}/test-results/${test.name}`, test, {
             cacheControl: '3600',
             upsert: false
         })
 
-        if(error) return console.error(error.message)
+        if(error) { toast.dismiss(); toast.error(error.message); return; }
         
         const { data } = await supabase.storage.from('public').getPublicUrl(`${wo.number}/test-results/${test.name}`)
 
@@ -106,36 +130,61 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
         setBillingClick(prev => !prev)
     }
     const submitBillingInformation = async () => {
-        if(!billingFile) return 'uploading file'
+        if(!billingFile) return toast.error('Need to upload a file before proceeding')
+        toast.loading('Uploading file.....')
         const { error } = await supabase.storage.from('public').upload(`${wo.number}/billing/${billingFile.name}`, billingFile, {
             cacheControl: '3600',
             upsert: false
         })
         
-        if(error) return console.error(error.message)
+        if(error) {
+            toast.dismiss()
+            toast.error(error.message)
+            return
+        }
 
         const { data } = await supabase.storage.from('public').getPublicUrl(`${wo.number}/billing/${billingFile.name}`)
 
         if(wo.type === 'test only') {
             const { error: errorUpload } = await supabase.from('billing').insert({wo_id: wo.id, link: data.publicUrl, notes: billingNotes, admin_id: admin.id, amount: billingAmount, approved: true, approved_at: new Date().toISOString(), invoice: billingInvoice})
 
-            if(errorUpload) return console.error(errorUpload.message)
+            if(errorUpload) {
+                toast.dismiss()
+                toast.error(errorUpload.message)
+                return
+            }
 
             const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString()}).eq('id', wo.id)
 
-            if(errorUpdate) return console.error(errorUpdate.message)
+            if(errorUpdate) {
+                toast.dismiss()
+                toast.error(errorUpdate.message)
+                return
+            }
 
+            toast.dismiss()
+            toast.success('Billing file uploaded')
             handleBillingClick()
             router.refresh()
         } else {
             const { error: errorUpload } = await supabase.from('billing').insert({wo_id: wo.id, link: data.publicUrl, notes: billingNotes, admin_id: admin.id, amount: billingAmount, approved: null, invoice: billingInvoice})
 
-            if(errorUpload) return console.error(errorUpload.message)
+            if(errorUpload) {
+                toast.dismiss()
+                toast.error(errorUpload.message)
+                return
+            }
 
             const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString()}).eq('id', wo.id)
 
-            if(errorUpdate) return console.error(errorUpdate.message)
+            if(errorUpdate) {
+                toast.dismiss()
+                toast.error(errorUpdate.message)
+                return
+            }
 
+            toast.dismiss()
+            toast.success('Billing file uploaded')
             handleBillingClick()
             router.refresh()
         }
@@ -144,31 +193,59 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
     
     // End Billing
     // Start Images
-    const uploadImg = async (img: File) => {
-        const { error } = await supabase.storage.from('public').upload(`${wo.number}/${img.name}`, img, {
-            cacheControl: '3600',
-            upsert: false
-        })
-
-        if(error) return console.error(error.message)
-
-        console.log('upload 100%')
-        
-    }
     const [imagesBtn, SetImagesBtn] = useState<boolean>(false)
     const [imagesFiles, setImagesFiles] = useState<FileList | null>(null)
     const handleImgBtn = () => {
         SetImagesBtn(prev => !prev)
     }
+    const uploadImg = async (img: File) => {
+        if(!img) return toast.error('Need to upload at least one image file before proceeding')
+        const { error } = await supabase.storage.from('public').upload(`${wo.number}/${img.name}`, img, {
+            cacheControl: '3600',
+            upsert: false
+        })
+
+        if(error) {
+            toast.dismiss()
+            toast.error(`Error uploading ${img.name}` + error.message)
+            return
+        }
+
+        const { data } = await supabase.storage.from('public').getPublicUrl(`${wo.number}/${img.name}`)
+
+        const { error: errorUpload } = await supabase.from('image').insert({wo_id: wo.id, url: data.publicUrl, type: img.type})
+
+        if(errorUpload) {
+            toast.dismiss()
+            toast.error(errorUpload.message)
+            return
+        }
+
+        const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString()}).eq('id', wo.id)
+
+        if(errorUpdate) {
+            toast.dismiss()
+            toast.error(errorUpdate.message)
+            return
+        }
+
+        toast.success(`Uploaded ${img.name} for work worder: ${wo.number}`)
+    }
     const submitImages = async () => {
-        if(!imagesFiles) return console.error('upload images')
+        if(!imagesFiles) return toast.loading('Uploading file(s).....')
+
         Array.from(imagesFiles).forEach(async (img) => {
             await uploadImg(img)
         })
+
+        toast.dismiss()
+        handleImgBtn()
+        router.refresh()
     }
     // End Images
     return (
         <div className="w-full max-w-7xl py-8">
+            <Toaster position="top-right"/>
             <div className="w-full flex justify-between">
                 <Link
                     href="/dashboard"
@@ -211,8 +288,9 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
                 {/* End Upload Billing */}
                 </div>
             </div>
+            <div className="py-4">
             {noteClicked && (
-                <div className="w-full p-4">
+                <div className="w-full p-4 border rounded bg-white shadow">
                     <textarea 
                     name="note" 
                     id="note" 
@@ -223,7 +301,7 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
                 </div>
             )}
             {shippingLabelClick && (
-                <div className="w-full p-4">
+                <div className="w-full p-4 border rounded bg-white shadow">
                     <p>Upload PDF File</p>
                     <input type="file" name="shippingFile" id="shippingFile" onChange={(e) => {
                         if(e.target.files !== null)
@@ -232,12 +310,13 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
                 </div>
             )}
             {numberClicked && (
-                <div className="w-full p-4">
+                <div className="w-full p-4 border rounded bg-white shadow">
+                    <p>Add Work Order Number</p>
                     <input type="text" name="number" id="number" onChange={(e) => setNumber(e.target.value)} className="rounded-md px-4 py-2 bg-inherit border mb-6 bg-white w-full"/>
                 </div>
             )}
             {testClicked && (
-                <div className="w-full p-4">
+                <div className="w-full p-4 border rounded bg-white shadow">
                     <p>Upload PDF File</p>
                     <input type="file" name="testFile" id="testFile" onChange={(e) => {
                         if(e.target.files !== null)
@@ -254,7 +333,7 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
                 </div>
             )}
             {billingClick && (
-                <div className="w-full p-4">
+                <div className="w-full p-4 border rounded bg-white shadow">
                     <p>Upload PDF File</p>
                     <input 
                         type="file" 
@@ -293,7 +372,7 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
                 </div>
             )}
             {imagesBtn && (
-                <div className="w-full p-4">
+                <div className="w-full p-4 border rounded bg-white shadow">
                     <p>Upload Images File</p>
                     <input type="file" name="imageFile" id="imageFile" onChange={(e) => {
                         if(e.target.files !== null)
@@ -301,7 +380,7 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
                     }} multiple/>
                 </div>
             )}
-
+            </div>
         </div>
     )
 }

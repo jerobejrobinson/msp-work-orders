@@ -1,7 +1,8 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
-import Link from "next/link"
+import WorkOrderTable from "@/components/WorkOrderTable"
+
 export default async function Page() {
     const supabase = await createServerComponentClient({ cookies })
 
@@ -13,7 +14,8 @@ export default async function Page() {
         redirect('/')
     }
 
-    const { data: workOrderData } = await supabase.from('work_order').select()
+    const { data: workOrderData } = await supabase.from('work_order').select('id, number, type, tracking_number, product_number, return_shipping, created_at, last_update_at')
+
     if(!workOrderData) {
         return (
             <div>
@@ -22,23 +24,9 @@ export default async function Page() {
         )
     }
     return (
-        <div className="min-h-screen w-full bg-background flex flex-col items-center mt-16">
-            <div className="w-full max-w-7xl flex justify-between pt-8">
-                
-                
-            </div>
-            <div className="w-full max-w-7xl flex flex-col gap-4 pt-8">
-                {workOrderData.map(wo => (
-                    <Link 
-                        className="bg-white border rounded w-full grid grid-cols-2 p-4"
-                        href={`/dashboard/${wo.id}`}
-                        key={wo.id}
-                    >
-                        <div>{wo.number}</div>
-                        <div>{wo.product_number}</div>
-                    </Link>
-                ))}
-            </div>
-        </div>
+        <>
+            {/* @ts-expect-error Server Component */}
+            <WorkOrderTable data={workOrderData} admin={true}/>
+        </>
     )
 }
