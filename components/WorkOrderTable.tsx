@@ -87,7 +87,7 @@ export default async function WorkOrderTable({ data, admin }: { data: [WorkOrder
                 {woData.map(wo => (
                     <Link 
                         className="bg-white border w-full grid grid-cols-5 p-4 hover:bg-main hover:text-white"
-                        href={`/work-orders/${wo.id}`}
+                        href={`/${admin ? "dashboard" : "work-orders"}/${wo.id}`}
                         key={wo.id}
                     >
                         <div>{wo.number}</div>

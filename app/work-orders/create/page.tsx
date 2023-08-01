@@ -23,7 +23,7 @@ interface WorkOrder {
 export default function Form() {
     const router = useRouter()
     const supabase = createClientComponentClient()
-    
+    const [submitState, setSubmitState] = useState<boolean>(false)
     const [formState, setFormState] = useState<{
         product_number: String | null,
         quanity: Number | null,
@@ -76,6 +76,7 @@ export default function Form() {
 
     const handleWorkOrderSubmission = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        toast.loading("Pending Submission")
         const { data: { user } } = await supabase.auth.getUser()
 
         if(!user) return 'not a user'
@@ -88,16 +89,11 @@ export default function Form() {
 
         if(error) return toast.error(error.message)
 
-        // await fetch('http://localhost:3000/api/email/send-work-order-confirmation', {
-        //     method: 'POST',
-        //     body: JSON.stringify({email: customer.email, name: customer.first_name + ' ' + customer.last_name})
-        // }).then(() => {
-        //     toast.success('email sent')
-        // }).catch(error => {
-        //     toast.error(error)
-        // })
-
+        // const res = 
         if(workOrderData) {
+            await fetch(`/work-orders/create/email?id=${workOrderData.id}`)
+            toast.dismiss()
+            toast.success('Work Order Submitted!')
             router.push(`/work-orders/create/successful?id=${workOrderData.id}`)
             router.refresh()
         }
@@ -300,8 +296,8 @@ export default function Form() {
                         <label htmlFor="reman" className='cursor-pointer'>Reman</label>
                     </div>
                 </div>
-                <button type="submit" className="bg-main w-full p-4 text-white text-lg font-bold">
-                    Submit Work Order
+                <button type="submit" className={`bg-main w-full p-4 text-white text-lg font-bold ${submitState ? 'animate-pulse' : ''}`} onClick={() => setSubmitState(prev => !prev)}>
+                    {submitState ? "Submitting..." : "Submit Work Order"}
                 </button>
             </form>
         </div>
