@@ -48,11 +48,11 @@ export async function GET(request: Request) {
             {
                 to: [
                     {
-                        email: data.customer.email
+                        email: "jrobinson@mspdieselsolutions.com"
                     }
                 ],
                 dynamic_template_data: {
-                    "name": data.customer.first_name + " " + data.customer.last_name,
+                    "name": `${data.customer.first_name} ${data.customer.last_name}`,
                     "phone": data.customer.phone,
                     "address": data.customer.address,
                     "address_2": data.customer.address_2,

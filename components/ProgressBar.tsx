@@ -46,7 +46,12 @@ export default async function ProgressBar({wo, test_results, billing}: {wo: any,
     }
 
     const shipped = () => {
-
+        if(!billing) return ''
+        if(billing.approved && !wo.tracking_number) {
+            return 'bg-greenLight text-white animate-pulse'
+        }else {
+            return 'bg-greenLight text-white'
+        }
     }
     return (
         <div className="w-full max-w-7xl py-8">
@@ -58,14 +63,14 @@ export default async function ProgressBar({wo, test_results, billing}: {wo: any,
                     <div className={`p-4 border-l-2 flex justify-center ${tested()}`}>tested</div>
                     <div className={`p-4 border-l-2 flex justify-center ${billed()}`}>Billed</div>
                     <div className={`p-4 border-l-2 flex justify-center ${workInProgress()}`}>Work In Progress</div>
-                    <div className="p-4 border-l-2 flex justify-center">Shipped</div>
+                    <div className={`p-4 border-l-2 flex justify-center ${shipped()}`}>Shipped</div>
                 </div>
                 ): <div className="grid grid-cols-5 bg-white rounded">
                     <div  className="p-4 flex justify-center bg-[#90EE90] text-white">Submitted</div>
                     <div className={`p-4 border-l-2 flex justify-center ${recieved()}`}>Recieved</div>
                     <div className={`p-4 border-l-2 flex justify-center ${tested()}`}>Tested</div>
                     <div className={`p-4 border-l-2 flex justify-center ${billed()}`}>Billed</div>
-                    <div className="p-4 border-l-2 flex justify-center">Shipped</div>
+                    <div className={`p-4 border-l-2 flex justify-center ${shipped()}`}>Shipped</div>
                 </div> 
             }
         </div>

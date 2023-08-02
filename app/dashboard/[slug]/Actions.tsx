@@ -243,6 +243,56 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
         router.refresh()
     }
     // End Images
+    // start cancel work order
+    const [cancelBtn, setCancelBtn] = useState<boolean>(false)
+    const [cancelReasonText, setCancelReasonText] = useState<string | null>(null)
+    const handleCancelBtnClick = () => {
+        setCancelBtn(prev => !prev)
+    }
+    const handleCancelAction = async () => {
+        toast.loading('Submitting...')
+        if(!cancelReasonText) return toast.error('Must provide a value before canceling work order')
+        // insert note to table with woid and admin id as foreign keys
+        const { error: insertError } = await supabase.from('canceled_work_order').insert({reason: cancelReasonText, customer_id: wo.customer_id, wo_json: JSON.stringify(wo)})
+        const { error: deleteError } = await supabase.from('work_order').delete().eq('id', wo.id)
+
+        if(insertError) {
+            toast.dismiss()
+            toast.error(insertError.message)
+            return;
+        }
+        if(deleteError) {
+            toast.dismiss()
+            toast.error(deleteError.message)
+            return;
+        }
+        toast.dismiss()
+        toast.success(`canceled: ${wo.id}`)
+        handleCancelBtnClick()
+        router.push('/dashboard')
+    }
+    // end cancel work order
+    // start tracking number
+    const [trackingNumberClick, setTrackingNumberClick] = useState<boolean>(false)
+    const [trackingNumberInput, setTrackingNumberInput] = useState<string | null>(null)
+    const handleTrackingNumberClick = () => {
+        setTrackingNumberClick(prev => !prev)
+    }
+    const trackingNumberAction = async () => {
+        toast.loading('Submiting...')
+        if(!trackingNumberInput) return toast.error('Must provide a value before submitting tracking number')
+        const { error } = await supabase.from('work_order').update({last_update_at: new Date().toISOString(), tracking_number: trackingNumberInput }).eq('id', wo.id)
+        if(error) {
+            toast.dismiss()
+            toast.error(error.message)
+            return;
+        }
+        toast.dismiss()
+        toast.success('Tracking Number')
+        handleTrackingNumberClick()
+        router.refresh()
+    }
+    // end tracking number
     return (
         <div className="w-full max-w-7xl py-8">
             <Toaster position="top-right"/>
@@ -258,6 +308,13 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
                 {!noteClicked ? (
                     <BtnAction click={handleNoteClick} name="Note" />
                     ):(<BtnOptions click={handleNoteClick} submit={submitNote} name="Note" />)}
+                {/* End Add Note Action */}
+                {/* Start Add Note Action */}
+                {
+                wo.tracking_number ? "" :
+                !cancelBtn ? (
+                    <BtnAction click={ handleCancelBtnClick} name="Cancel Work Order" />
+                    ):(<BtnOptions click={ handleCancelBtnClick} submit={handleCancelAction} name="Cancel Work Order" />)}
                 {/* End Add Note Action */}
                 {/* Start Return Shipping Action */}
                 {wo.return_shipping ? '' : !shippingLabelClick ? (
@@ -286,6 +343,14 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
                     ( <BtnAction click={handleBillingClick} name="Billing" /> )
                     : !billing ? (<BtnOptions click={handleBillingClick} submit={submitBillingInformation} name="Billing" />) : ''}
                 {/* End Upload Billing */}
+                {/* Start Upload Tracking Number */}
+                    {
+                        !wo.tracking_number && billing && billing.approved ? 
+                            !trackingNumberClick ? (<BtnAction click={handleTrackingNumberClick} name="Tracking Number" />) : 
+                            (<BtnOptions click={handleTrackingNumberClick} submit={trackingNumberAction} name="Tracking Number" />) 
+                        : '' 
+                    }
+                {/* End Upload Tracking Number */}
                 </div>
             </div>
             <div className="py-4">
@@ -297,6 +362,17 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
                     className="w-full border rounded p-4 outline-0" 
                     rows={7}
                     onChange={(e) => setNote(e.target.value)}
+                    ></textarea>
+                </div>
+            )}
+            {cancelBtn && (
+                <div className="w-full p-4 border rounded bg-white shadow">
+                    <textarea 
+                    name="note" 
+                    id="note" 
+                    className="w-full border rounded p-4 outline-0" 
+                    rows={7}
+                    onChange={(e) => setCancelReasonText(e.target.value)}
                     ></textarea>
                 </div>
             )}
@@ -313,6 +389,12 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
                 <div className="w-full p-4 border rounded bg-white shadow">
                     <p>Add Work Order Number</p>
                     <input type="text" name="number" id="number" onChange={(e) => setNumber(e.target.value)} className="rounded-md px-4 py-2 bg-inherit border mb-6 bg-white w-full"/>
+                </div>
+            )}
+            {trackingNumberClick && (
+                <div className="w-full p-4 border rounded bg-white shadow">
+                    <p>Add tracking Number</p>
+                    <input type="text" name="number" id="number" onChange={(e) => setTrackingNumberInput(e.target.value)} className="rounded-md px-4 py-2 bg-inherit border mb-6 bg-white w-full"/>
                 </div>
             )}
             {testClicked && (
