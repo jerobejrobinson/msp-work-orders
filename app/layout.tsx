@@ -42,12 +42,15 @@ export default async function RootLayout({ children, }: {children: React.ReactNo
               </>
             )}
             {!admin && !user && (
+              <>
+              <p>MSP Work Order Tracker</p>
               <Link
                 href="/login"
-                className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover"
+                className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover self-end"
               >
                 Login
               </Link>
+              </>
             )}
             {admin && user && (
               <>

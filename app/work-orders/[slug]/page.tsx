@@ -51,14 +51,9 @@ export default async function Order({params}: { params: { slug: string }}) {
     return (
         <div className="min-h-screen w-full bg-background flex flex-col items-center relative mt-16">
             <CustomerActions wo={wo} customer_id={customerData.id} billing={billing} testing={test_results}/>
-
-            {/* @ts-expect-error Server Component */}
-            <ProgressBar wo={wo} billing={billing} test_results={test_results}/>
-
-            {/* @ts-expect-error Server Component */}
-            <WorkOrder wo={wo} />
             
-            {/* @ts-expect-error Server Component */}
+            <ProgressBar wo={wo} billing={billing} test_results={test_results}/>
+            <WorkOrder wo={wo} />
             <WorkOrderNotes wo={wo} />
 
             {/* @ts-expect-error Server Component */}
@@ -88,7 +83,6 @@ export default async function Order({params}: { params: { slug: string }}) {
                 </div>
             </div>
 
-            {/* @ts-expect-error Server Component */}
             <Images wo={wo} />
         </div>
     )
