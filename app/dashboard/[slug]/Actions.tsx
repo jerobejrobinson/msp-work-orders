@@ -4,10 +4,9 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { useState } from 'react'
 import { useRouter } from "next/navigation"
 import { Toaster, toast } from 'react-hot-toast'
+import { stringify } from "querystring"
 
-
-
-export default function AdminActions({wo, admin, testRes, billing}: {wo: any, admin: any, testRes: any, billing: any}) {
+export default function AdminActions({wo, admin, testRes, billing, notes}: {wo: any, admin: any, testRes: any, billing: any, notes: any}) {
     const supabase = createClientComponentClient()
     const router = useRouter()
 
@@ -44,6 +43,7 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
         }
 
         toast.dismiss()
+        await fetch(`/dashboard/get/api/email/send-shipping-label?id=${wo.id}&an=${admin.id}`)
         toast.success("Shipping label uploaded.")
         handleShippingLabelClick()
         router.refresh()
@@ -58,13 +58,14 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
     const submitNote = async () => {
         if(!note) return toast.error('Must provide a value before sending notes')
         // insert note to table with woid and admin id as foreign keys
-        const { error: noteError } = await supabase.from('note').insert({wo_id: wo.id, admin_id: admin.id, note})
+        const { data, error: noteError } = await supabase.from('note').insert({wo_id: wo.id, admin_id: admin.id, note}).select()
         if(noteError) {
             toast.dismiss()
             toast.error(noteError.message)
             return;
         }
         toast.dismiss()
+        await fetch(`/dashboard/get/api/email/send-note?id=${wo.id}&an=${admin.id}&nId=${data[0].id}`)
         toast.success('Note added')
         handleNoteClick()
         router.refresh()
@@ -85,6 +86,7 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
             return;
         }
         toast.dismiss()
+        await fetch(`/dashboard/get/api/email/send-wo-number?id=${wo.id}&an=${admin.id}`)
         toast.success('Work order number updated')
         handleNumberClick()
         router.refresh()
@@ -108,7 +110,7 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
         
         const { data } = await supabase.storage.from('public').getPublicUrl(`${wo.number}/test-results/${test.name}`)
 
-        const { error: errorUpload } = await supabase.from('test_result').insert({wo_id: wo.id, link: data.publicUrl, note: testNote, admin_id: admin.id})
+        const { data: testData, error: errorUpload } = await supabase.from('test_result').insert({wo_id: wo.id, link: data.publicUrl, note: testNote, admin_id: admin.id}).select()
 
         if(errorUpload) return console.error(errorUpload.message)
 
@@ -116,6 +118,7 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
 
         if(errorUpdate) return console.error(errorUpdate.message)
 
+        await fetch(`/dashboard/get/api/email/send-test?id=${wo.id}&an=${admin.id}&tId=${testData[0].id}`)
         handleTestClick()
         router.refresh()
     }
@@ -146,7 +149,7 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
         const { data } = await supabase.storage.from('public').getPublicUrl(`${wo.number}/billing/${billingFile.name}`)
 
         if(wo.type === 'test only') {
-            const { error: errorUpload } = await supabase.from('billing').insert({wo_id: wo.id, link: data.publicUrl, notes: billingNotes, admin_id: admin.id, amount: billingAmount, approved: true, approved_at: new Date().toISOString(), invoice: billingInvoice})
+            const { data: billing, error: errorUpload } = await supabase.from('billing').insert({wo_id: wo.id, link: data.publicUrl, notes: billingNotes, admin_id: admin.id, amount: billingAmount, approved: true, approved_at: new Date().toISOString(), invoice: billingInvoice}).select()
 
             if(errorUpload) {
                 toast.dismiss()
@@ -163,11 +166,12 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
             }
 
             toast.dismiss()
+            await fetch(`/dashboard/get/api/email/send-billing?id=${wo.id}&an=${admin.id}&bId=${billing[0].id}`)
             toast.success('Billing file uploaded')
             handleBillingClick()
             router.refresh()
         } else {
-            const { error: errorUpload } = await supabase.from('billing').insert({wo_id: wo.id, link: data.publicUrl, notes: billingNotes, admin_id: admin.id, amount: billingAmount, approved: null, invoice: billingInvoice})
+            const { data: billing, error: errorUpload } = await supabase.from('billing').insert({wo_id: wo.id, link: data.publicUrl, notes: billingNotes, admin_id: admin.id, amount: billingAmount, approved: null, invoice: billingInvoice}).select()
 
             if(errorUpload) {
                 toast.dismiss()
@@ -184,6 +188,7 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
             }
 
             toast.dismiss()
+            await fetch(`/dashboard/get/api/email/send-billing?id=${wo.id}&an=${admin.id}&bId=${billing[0].id}`)
             toast.success('Billing file uploaded')
             handleBillingClick()
             router.refresh()
@@ -252,8 +257,8 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
     const handleCancelAction = async () => {
         toast.loading('Submitting...')
         if(!cancelReasonText) return toast.error('Must provide a value before canceling work order')
-        // insert note to table with woid and admin id as foreign keys
-        const { error: insertError } = await supabase.from('canceled_work_order').insert({reason: cancelReasonText, customer_id: wo.customer_id, wo_json: JSON.stringify(wo)})
+        const { error: insertError } = await supabase.from('canceled_work_order').insert({reason: cancelReasonText, customer_id: wo.customer_id, wo_json: JSON.stringify(wo), note_json: JSON.stringify(notes), test_json: JSON.stringify(testRes), billing_json: stringify(billing), admin_id:  admin.id})
+
         const { error: deleteError } = await supabase.from('work_order').delete().eq('id', wo.id)
 
         if(insertError) {
@@ -288,6 +293,7 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
             return;
         }
         toast.dismiss()
+        await fetch(`/dashboard/get/api/email/send-tracking-number?id=${wo.id}&an=${admin.id}`)
         toast.success('Tracking Number')
         handleTrackingNumberClick()
         router.refresh()
@@ -295,7 +301,7 @@ export default function AdminActions({wo, admin, testRes, billing}: {wo: any, ad
     // end tracking number
     return (
         <div className="w-full max-w-7xl py-8">
-            <Toaster position="top-right"/>
+            <Toaster/>
             <div className="w-full flex justify-between">
                 <Link
                     href="/dashboard"

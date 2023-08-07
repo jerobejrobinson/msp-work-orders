@@ -3,6 +3,7 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import LogoutButton from '../components/LogoutButton'
+import Image from 'next/image'
 
 export const metadata = {
   title: 'Create Next App',
@@ -23,7 +24,16 @@ export default async function RootLayout({ children, }: {children: React.ReactNo
           <div className="w-full max-w-7xl flex justify-between items-center p-3 text-sm text-foreground">
             {!admin && user && (
               <>
-                <p>{user.email}</p>
+                <Link
+                  href="/"
+                >
+                  <Image 
+                    src="/images/clear-logo.png"
+                    width={200}
+                    height={100}
+                    alt="MSP Diesel Solution Logo"
+                  />
+                </Link>
                 <div className='flex flex-row items-center gap-4'>
                   <Link
                     href="/work-orders"
@@ -43,7 +53,16 @@ export default async function RootLayout({ children, }: {children: React.ReactNo
             )}
             {!admin && !user && (
               <>
-              <p>MSP Work Order Tracker</p>
+              <Link
+                href="/"
+              >
+                <Image 
+                  src="/images/clear-logo.png"
+                  width={200}
+                  height={100}
+                  alt="MSP Diesel Solution Logo"
+                />
+              </Link>
               <Link
                 href="/login"
                 className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover self-end"
@@ -54,8 +73,18 @@ export default async function RootLayout({ children, }: {children: React.ReactNo
             )}
             {admin && user && (
               <>
-                <p>{admin.first_name}</p>
+                <Link
+                  href="/"
+                >
+                  <Image 
+                    src="/images/clear-logo.png"
+                    width={200}
+                    height={100}
+                    alt="MSP Diesel Solution Logo"
+                  />
+                </Link>
                 <div className='flex flex-row items-center gap-4'>
+                <p>{admin.first_name}</p>
                   <Link
                     href="/dashboard"
                     className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover flex flex-row items-center"

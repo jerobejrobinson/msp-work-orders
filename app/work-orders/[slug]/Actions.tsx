@@ -28,7 +28,8 @@ export default function CustomerActions({wo, customer_id, billing, testing}: {wo
         }
         if(data) { 
             toast.dismiss()
-            toast.success('Added note') 
+            await fetch(`/work-orders/get/api/email/send-note?id=${wo.id}&nId=${data[0].id}`)
+            toast.success('Added note')
         }
         handleNoteClick()
         router.refresh()
@@ -53,6 +54,7 @@ export default function CustomerActions({wo, customer_id, billing, testing}: {wo
         }
         if(data) {
             toast.dismiss()
+            await fetch(`/work-orders/get/api/email/send-type-decision?id=${wo.id}`)
             toast.success('Updated type')
         }
         handleTypeClick()
@@ -78,6 +80,7 @@ export default function CustomerActions({wo, customer_id, billing, testing}: {wo
         }
         if(data) {
             toast.dismiss()
+            await fetch(`/work-orders/get/api/email/send-wo-approval?id=${wo.id}&bId=${billing.id}`)
             toast.success('decision sent')
         }
         handleBillingClick()
@@ -85,7 +88,7 @@ export default function CustomerActions({wo, customer_id, billing, testing}: {wo
     }
     return (
         <div className="w-full max-w-7xl py-8">
-            <Toaster position="top-right"/>
+            <Toaster/>
             <div className="w-full flex justify-between">
                 <Link
                     href="/work-orders"

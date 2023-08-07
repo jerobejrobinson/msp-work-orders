@@ -35,11 +35,13 @@ export async function GET(request: Request) {
     const id = searchParams.get('id')
     
     // @ts-ignore
-    const { data, error } = await supabase.from('work_order').select('id, type, product_number, quanity, carrier, shipping, details, part_issue, customer ( email, first_name, last_name, address, address_2, phone, state, city, zip, country, account_number, company_name,  )').eq('id', id).limit(1).single<WorkOrder>()
+    const { data, error } = await supabase.from('work_order').select('id, type, product_number, quanity, carrier, shipping, details, part_issues, customer ( email, first_name, last_name, address, address_2, phone, state, city, zip, country, account_number, company_name )').eq('id', id).limit(1).single<WorkOrder>()
 
     if(error) {
+        console.log(error)
         return NextResponse.json({status: 500, msg: "Could not retreive work order."})
     }
+
     const adminMsg = {
         from: {
             email: "jrobinson@mspdieselsolutions.com"
@@ -88,8 +90,8 @@ export async function GET(request: Request) {
                     }
                 ],
                 dynamic_template_data: {
-                    "name": 'jerobe',
-                    "packingSlipURL": `${process.env.NEXT_PUBLIC_URL}/assets/mspShippingDoc.pdf`
+                    "name": data.customer.first_name,
+                    "packingSlipUrl": `${process.env.NEXT_PUBLIC_URL}/assets/mspShippingDoc.pdf`
                 }
             }
         ],

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import Link from 'next/link'
-
+import Image from 'next/image'
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -36,6 +36,12 @@ export default function Login() {
 
   return (
     <div className="min-h-screen w-full bg-background flex flex-col items-center relative mt-16">
+      <Image 
+        src="/images/clear-logo.png"
+        width={333}
+        height={166}
+        alt="MSP Diesel Solution Logo"
+      />
       {view === 'check-email' ? (
         <p className="text-center text-foreground">
           Check <span className="font-bold">{email}</span> to continue signing
@@ -43,7 +49,7 @@ export default function Login() {
         </p>
       ) : (
         <form
-          className="flex-1 flex flex-col w-full justify-center gap-2 text-foreground max-w-xl"
+          className="flex-1 flex flex-col w-full gap-2 text-foreground max-w-xl"
           onSubmit={view === 'sign-in' ? handleSignIn : handleSignUp}
         >
           <label className="text-md" htmlFor="email">

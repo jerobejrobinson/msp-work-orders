@@ -27,7 +27,13 @@ interface Billing {
     approved_at: Date,
     invoice: string
 }
-
+interface Note {
+    id: string,
+    created_at: Date,
+    note: string,
+    customer: { first_name: string } | null,
+    admin: { first_name: string } | null
+}
 export default async function Order({params}: { params: { slug: string }}) {
 
     const supabase = createServerComponentClient({ cookies })
@@ -47,6 +53,7 @@ export default async function Order({params}: { params: { slug: string }}) {
     const { data: wo } = await supabase.from('work_order').select().eq('id', params.slug).limit(1).single()
     const { data: test_results }= await supabase.from('test_result').select(`id, created_at, note, link, admin ( first_name )`).eq('wo_id', params.slug).returns<[TestResult]>()
     const { data: billing, error } = await supabase.from('billing').select('id, created_at, notes, amount, link, approved, approved_at, invoice, admin ( first_name )').eq('wo_id', params.slug).limit(1).returns<[Billing]>().single()
+    const { data: notes }= await supabase.from('note').select(`id, created_at, note, customer ( first_name ), admin ( first_name )`).eq('wo_id', wo.id).returns<[Note]>()
 
     return (
         <div className="min-h-screen w-full bg-background flex flex-col items-center relative mt-16">
@@ -54,7 +61,7 @@ export default async function Order({params}: { params: { slug: string }}) {
             
             <ProgressBar wo={wo} billing={billing} test_results={test_results}/>
             <WorkOrder wo={wo} />
-            <WorkOrderNotes wo={wo} />
+            <WorkOrderNotes notes={notes} />
 
             {/* @ts-expect-error Server Component */}
             <TestResults test_results={test_results} />

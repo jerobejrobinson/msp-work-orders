@@ -91,7 +91,7 @@ export default function Form() {
 
         // const res = 
         if(workOrderData) {
-            await fetch(`/work-orders/create/email?id=${workOrderData.id}`)
+            await fetch(`/work-orders/create/api/email?id=${workOrderData.id}`)
             toast.dismiss()
             toast.success('Work Order Submitted!')
             router.push(`/work-orders/create/successful?id=${workOrderData.id}`)
