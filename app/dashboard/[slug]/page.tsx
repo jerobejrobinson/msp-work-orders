@@ -1,6 +1,6 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
-import { redirect } from "next/navigation"
+import { redirect, notFound } from "next/navigation"
 import AdminActions from "./Actions"
 import BillingAction from "./BillingAction"
 import ProgressBar from "@/components/ProgressBar"
@@ -16,6 +16,7 @@ interface TestResult {
     admin: { first_name: string } | null,
     link: string
 }
+
 interface Billing {
     id: string,
     created_at: Date,
@@ -27,6 +28,7 @@ interface Billing {
     approved_at: Date,
     invoice: string
 }
+
 interface Note {
     id: string,
     created_at: Date,
@@ -34,6 +36,7 @@ interface Note {
     customer: { first_name: string } | null,
     admin: { first_name: string } | null
 }
+
 export default async function Order({params}: { params: { slug: string }}) {
 
     const supabase = createServerComponentClient({ cookies })
@@ -52,6 +55,9 @@ export default async function Order({params}: { params: { slug: string }}) {
 
     const { data: wo } = await supabase.from('work_order').select().eq('id', params.slug).limit(1).single()
 
+    if(!wo) {
+        notFound()
+    }
     const { data: test_results, error: test_resultsError }= await supabase.from('test_result').select(`id, created_at, note, link, admin ( first_name )`).eq('wo_id', wo.id).returns<[TestResult]>()
     const { data: billing, error: billingError } = await supabase.from('billing').select('id, created_at, notes, amount, link, approved, approved_at, invoice, admin ( first_name )').eq('wo_id', wo.id).limit(1).returns<[Billing]>().single()
     const { data: notes }= await supabase.from('note').select(`id, created_at, note, customer ( first_name ), admin ( first_name )`).eq('wo_id', wo.id).returns<[Note]>()

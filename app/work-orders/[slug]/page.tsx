@@ -1,6 +1,6 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
-import { redirect } from "next/navigation"
+import { redirect, notFound } from "next/navigation"
 import CustomerActions from "./Actions"
 import Link from "next/link"
 import ProgressBar from "@/components/ProgressBar"
@@ -51,9 +51,14 @@ export default async function Order({params}: { params: { slug: string }}) {
     }
 
     const { data: wo } = await supabase.from('work_order').select().eq('id', params.slug).limit(1).single()
+
+    if(!wo) {
+        notFound()
+    }
+
     const { data: test_results }= await supabase.from('test_result').select(`id, created_at, note, link, admin ( first_name )`).eq('wo_id', params.slug).returns<[TestResult]>()
     const { data: billing, error } = await supabase.from('billing').select('id, created_at, notes, amount, link, approved, approved_at, invoice, admin ( first_name )').eq('wo_id', params.slug).limit(1).returns<[Billing]>().single()
-    const { data: notes }= await supabase.from('note').select(`id, created_at, note, customer ( first_name ), admin ( first_name )`).eq('wo_id', wo.id).returns<[Note]>()
+    const { data: notes }= await supabase.from('note').select(`id, created_at, note, customer ( first_name ), admin ( first_name )`).eq('wo_id', params.slug).returns<[Note]>()
 
     return (
         <div className="min-h-screen w-full bg-background flex flex-col items-center relative mt-16">
