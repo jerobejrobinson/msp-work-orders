@@ -2,7 +2,7 @@ import Link from "next/link"
 
 export default async function Page({ searchParams }: { searchParams?: { [key: string]: string | string[] | undefined } }) {
     return (
-        <div className="w-full min-h-screen bg-background flex flex-col items-center mt-16">
+        <div className="w-full h-main bg-background flex flex-col items-center mt-16">
             <div className="w-full max-w-7xl py-8">
                 <div className="w-full flex justify-end">
                     <Link

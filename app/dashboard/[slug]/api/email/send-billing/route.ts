@@ -25,6 +25,7 @@ interface Admin {
     first_name: string
     last_name: string
 }
+
 export async function GET(request: Request) {
     sgMail.setApiKey(process.env.NEXT_PUBLIC_SENDGRID_API_KEY)
     const supabase = createRouteHandlerClient({ cookies })

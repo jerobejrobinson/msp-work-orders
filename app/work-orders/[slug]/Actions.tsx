@@ -29,6 +29,14 @@ export default function CustomerActions({wo, customer_id, billing, testing}: {wo
         if(data) { 
             toast.dismiss()
             await fetch(`/work-orders/get/api/email/send-note?id=${wo.id}&nId=${data[0].id}`)
+            await fetch(`/work-orders/c/api/log`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    id: wo.id,
+                    cId: customer_id,
+                    type: `Added new note.`
+                })
+            })
             toast.success('Added note')
         }
         handleNoteClick()
@@ -55,6 +63,14 @@ export default function CustomerActions({wo, customer_id, billing, testing}: {wo
         if(data) {
             toast.dismiss()
             await fetch(`/work-orders/get/api/email/send-type-decision?id=${wo.id}`)
+            await fetch(`/work-orders/c/api/log`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    id: wo.id,
+                    cId: customer_id,
+                    type: `Updated work order type.`
+                })
+            })
             toast.success('Updated type')
         }
         handleTypeClick()
@@ -81,6 +97,14 @@ export default function CustomerActions({wo, customer_id, billing, testing}: {wo
         if(data) {
             toast.dismiss()
             await fetch(`/work-orders/get/api/email/send-wo-approval?id=${wo.id}&bId=${billing.id}`)
+            await fetch(`/work-orders/c/api/log`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    id: wo.id,
+                    cId: customer_id,
+                    type: `Submitted work order approval.`
+                })
+            })
             toast.success('decision sent')
         }
         handleBillingClick()

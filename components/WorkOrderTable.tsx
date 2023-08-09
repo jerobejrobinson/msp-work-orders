@@ -59,7 +59,7 @@ export default async function WorkOrderTable({ data, admin }: { data: [WorkOrder
     const woData = await Promise.all(plusAddWorkOrderStatus)
 
     return (
-        <div className="min-h-screen w-full bg-background flex flex-col items-center mt-16 space-y-8">
+        <div className="h-main w-full bg-background flex flex-col items-center mt-16 space-y-8">
             <div className="w-full max-w-7xl flex justify-between pt-8">
                 <Link
                     href="/"

@@ -1,0 +1,14 @@
+import Link from "next/link"
+export default function NotFound() {
+    return (
+        <div>
+            <p>Your customer profile has not been set up please click the link below to continue.</p>
+            <Link
+                href="/profile"
+                className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover flex flex-row items-center"
+            >
+                Add Customer Profile
+            </Link>
+        </div>
+    )
+}

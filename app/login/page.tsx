@@ -1,14 +1,15 @@
 'use client'
-
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import Link from 'next/link'
 import Image from 'next/image'
+import { useSearchParams } from 'next/navigation'
+
 export default function Login() {
+  const searchParams = useSearchParams().get('sign-up')
+  const [view, setView] = useState(searchParams ? 'sign-up' : 'sign-in')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [view, setView] = useState('sign-in')
   const router = useRouter()
   const supabase = createClientComponentClient()
 
@@ -35,7 +36,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-background flex flex-col items-center relative mt-16">
+    <div className="h-main w-full bg-background flex flex-col items-center relative mt-16">
       <Image 
         src="/images/clear-logo.png"
         width={333}

@@ -37,6 +37,17 @@ interface Note {
     admin: { first_name: string } | null
 }
 
+
+interface Image {
+    id: string,
+    wo_id: string,
+    created_at: Date,
+    url: string,
+    type: string
+}
+
+export const revalidate = 0
+
 export default async function Order({params}: { params: { slug: string }}) {
 
     const supabase = createServerComponentClient({ cookies })
@@ -61,12 +72,13 @@ export default async function Order({params}: { params: { slug: string }}) {
     const { data: test_results, error: test_resultsError }= await supabase.from('test_result').select(`id, created_at, note, link, admin ( first_name )`).eq('wo_id', wo.id).returns<[TestResult]>()
     const { data: billing, error: billingError } = await supabase.from('billing').select('id, created_at, notes, amount, link, approved, approved_at, invoice, admin ( first_name )').eq('wo_id', wo.id).limit(1).returns<[Billing]>().single()
     const { data: notes }= await supabase.from('note').select(`id, created_at, note, customer ( first_name ), admin ( first_name )`).eq('wo_id', wo.id).returns<[Note]>()
+    const { data: images, error: imagesError } = await supabase.from('image').select('*').eq('wo_id', wo.id).returns<[Image]>()
 
     const { data: customer, error: customerError } = await supabase.from('customer').select('*').eq('id', wo.customer_id).limit(1).single()
               
     return (
-        <div className="min-h-screen w-full bg-background flex flex-col items-center relative mt-16">
-            <AdminActions wo={wo} testRes={test_results} billing={billing} admin={admin} notes={notes}/>
+        <div className="h-main w-full bg-background flex flex-col items-center relative mt-16">
+            <AdminActions wo={wo} testRes={test_results} billing={billing} admin={admin} notes={notes}  images={images}/>
             <ProgressBar wo={wo} test_results={test_results} billing={billing} />
             <WorkOrder wo={wo} />
             
@@ -123,7 +135,7 @@ export default async function Order({params}: { params: { slug: string }}) {
                 </div>
             </div>
             
-            <Images wo={wo} />
+            <Images images={images} />
         </div>
     )
 }

@@ -2,7 +2,9 @@ import WorkOrderTable from "@/components/WorkOrderTable"
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 import Link from "next/link"
-import { redirect } from "next/navigation"
+import { redirect, notFound } from "next/navigation"
+
+export const revalidate = 0
 
 export default async function WorkOrderPage() {
     const supabase = createServerComponentClient({ cookies })
@@ -11,18 +13,9 @@ export default async function WorkOrderPage() {
         redirect('/login')
     }
     const { data: customerData } = await supabase.from('customer').select('user_id, id').eq('user_id', user.id).limit(1).single()
+
     if(!customerData) {
-        return (
-            <div>
-                <p>Your customer profile has not been set up please click the link below to continue.</p>
-                <Link
-                    href="/profile"
-                    className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover flex flex-row items-center"
-                >
-                    Add Customer Profile
-                </Link>
-            </div>
-        )
+       notFound()
     }
 
     const { data: workOrderData } = await supabase.from('work_order').select('id, number, type, tracking_number, product_number, return_shipping, created_at, last_update_at').eq('customer_id', customerData.id).order('last_update_at', { ascending: false })

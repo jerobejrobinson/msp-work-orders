@@ -3,6 +3,8 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import WorkOrderTable from "@/components/WorkOrderTable"
 
+export const revalidate = 0
+
 export default async function Page() {
     const supabase = await createServerComponentClient({ cookies })
 

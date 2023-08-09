@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { Toaster, toast } from 'react-hot-toast'
 import { stringify } from "querystring"
 
-export default function AdminActions({wo, admin, testRes, billing, notes}: {wo: any, admin: any, testRes: any, billing: any, notes: any}) {
+export default function AdminActions({wo, admin, testRes, billing, notes, images}: {wo: any, admin: any, testRes: any, billing: any, notes: any, images: any}) {
     const supabase = createClientComponentClient()
     const router = useRouter()
 
@@ -44,6 +44,14 @@ export default function AdminActions({wo, admin, testRes, billing, notes}: {wo: 
 
         toast.dismiss()
         await fetch(`/dashboard/get/api/email/send-shipping-label?id=${wo.id}&an=${admin.id}`)
+        await fetch(`/dashboard/admin/api/log`, {
+            method: 'POST',
+            body: JSON.stringify({
+                id: wo.id,
+                aId: admin.id,
+                type: 'Uploaded the shipping label to work order.'
+            })
+        })
         toast.success("Shipping label uploaded.")
         handleShippingLabelClick()
         router.refresh()
@@ -66,6 +74,14 @@ export default function AdminActions({wo, admin, testRes, billing, notes}: {wo: 
         }
         toast.dismiss()
         await fetch(`/dashboard/get/api/email/send-note?id=${wo.id}&an=${admin.id}&nId=${data[0].id}`)
+        await fetch(`/dashboard/admin/api/log`, {
+            method: 'POST',
+            body: JSON.stringify({
+                id: wo.id,
+                aId: admin.id,
+                type: 'Uploaded a note to work order'
+            })
+        })
         toast.success('Note added')
         handleNoteClick()
         router.refresh()
@@ -87,6 +103,14 @@ export default function AdminActions({wo, admin, testRes, billing, notes}: {wo: 
         }
         toast.dismiss()
         await fetch(`/dashboard/get/api/email/send-wo-number?id=${wo.id}&an=${admin.id}`)
+        await fetch(`/dashboard/admin/api/log`, {
+            method: 'POST',
+            body: JSON.stringify({
+                id: wo.id,
+                aId: admin.id,
+                type: 'Updated the work order number. WO is now WO-' + wo.number
+            })
+        })
         toast.success('Work order number updated')
         handleNumberClick()
         router.refresh()
@@ -119,6 +143,15 @@ export default function AdminActions({wo, admin, testRes, billing, notes}: {wo: 
         if(errorUpdate) return console.error(errorUpdate.message)
 
         await fetch(`/dashboard/get/api/email/send-test?id=${wo.id}&an=${admin.id}&tId=${testData[0].id}`)
+        await fetch(`/dashboard/admin/api/log`, {
+            method: 'POST',
+            body: JSON.stringify({
+                id: wo.id,
+                aId: admin.id,
+                type: 'Uploaded test results to work order'
+            })
+        })
+        toast.success('Test results file uploaded')
         handleTestClick()
         router.refresh()
     }
@@ -167,6 +200,14 @@ export default function AdminActions({wo, admin, testRes, billing, notes}: {wo: 
 
             toast.dismiss()
             await fetch(`/dashboard/get/api/email/send-billing?id=${wo.id}&an=${admin.id}&bId=${billing[0].id}`)
+            await fetch(`/dashboard/admin/api/log`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    id: wo.id,
+                    aId: admin.id,
+                    type: 'Uploaded a test only bill to work order'
+                })
+            })
             toast.success('Billing file uploaded')
             handleBillingClick()
             router.refresh()
@@ -189,6 +230,14 @@ export default function AdminActions({wo, admin, testRes, billing, notes}: {wo: 
 
             toast.dismiss()
             await fetch(`/dashboard/get/api/email/send-billing?id=${wo.id}&an=${admin.id}&bId=${billing[0].id}`)
+            await fetch(`/dashboard/admin/api/log`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    id: wo.id,
+                    aId: admin.id,
+                    type: 'Uploaded a repair/reman bill to work order'
+                })
+            })
             toast.success('Billing file uploaded')
             handleBillingClick()
             router.refresh()
@@ -244,6 +293,15 @@ export default function AdminActions({wo, admin, testRes, billing, notes}: {wo: 
         })
 
         toast.dismiss()
+        await fetch(`/dashboard/admin/api/log`, {
+            method: 'POST',
+            body: JSON.stringify({
+                id: wo.id,
+                aId: admin.id,
+                type: 'Uploaded images to work order'
+            })
+        })
+        toast.success('Uploaded images')
         handleImgBtn()
         router.refresh()
     }
@@ -257,7 +315,7 @@ export default function AdminActions({wo, admin, testRes, billing, notes}: {wo: 
     const handleCancelAction = async () => {
         toast.loading('Submitting...')
         if(!cancelReasonText) return toast.error('Must provide a value before canceling work order')
-        const { error: insertError } = await supabase.from('canceled_work_order').insert({reason: cancelReasonText, customer_id: wo.customer_id, wo_json: JSON.stringify(wo), note_json: JSON.stringify(notes), test_json: JSON.stringify(testRes), billing_json: stringify(billing), admin_id:  admin.id})
+        const { error: insertError } = await supabase.from('canceled_work_order').insert({reason: cancelReasonText, customer_id: wo.customer_id, wo_json: JSON.stringify(wo), note_json: JSON.stringify(notes), test_json: JSON.stringify(testRes), billing_json: stringify(billing), admin_id:  admin.id, image_json: JSON.stringify(images)})
 
         const { error: deleteError } = await supabase.from('work_order').delete().eq('id', wo.id)
 
@@ -272,6 +330,14 @@ export default function AdminActions({wo, admin, testRes, billing, notes}: {wo: 
             return;
         }
         toast.dismiss()
+        await fetch(`/dashboard/admin/api/log`, {
+            method: 'POST',
+            body: JSON.stringify({
+                id: wo.id,
+                aId: admin.id,
+                type: 'Canceled work order'
+            })
+        })
         toast.success(`canceled: ${wo.id}`)
         handleCancelBtnClick()
         router.push('/dashboard')
@@ -294,6 +360,14 @@ export default function AdminActions({wo, admin, testRes, billing, notes}: {wo: 
         }
         toast.dismiss()
         await fetch(`/dashboard/get/api/email/send-tracking-number?id=${wo.id}&an=${admin.id}`)
+        await fetch(`/dashboard/admin/api/log`, {
+            method: 'POST',
+            body: JSON.stringify({
+                id: wo.id,
+                aId: admin.id,
+                type: 'Uploaded tracking number'
+            })
+        })
         toast.success('Tracking Number')
         handleTrackingNumberClick()
         router.refresh()
