@@ -29,6 +29,7 @@ interface Admin {
 export async function GET(request: Request) {
     sgMail.setApiKey(process.env.NEXT_PUBLIC_SENDGRID_API_KEY)
     const supabase = createRouteHandlerClient({ cookies })
+    
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
     const an = searchParams.get('an')

@@ -39,7 +39,7 @@ export default function CustomerForm() {
 
         const { data, error } = await supabase
             .from('customer')
-            .insert([{...formState, user_id: user.id}])
+            .insert([{...formState, user_id: user.id, email: user.email}])
             .select()
 
 
@@ -48,14 +48,13 @@ export default function CustomerForm() {
         if(data) router.refresh()
     }
     return (
-        <div className="flex flex-col max-w-3xl w-full px-4">
-          <section className='pt-20'>
-            <h1 className='text-xl font-bold'>Edit Profile Information</h1>
-            <p>Please enter all information to submit a work order ticket.</p>
+        <div className="mt-16">
+          <section className='p-8 max-w-7xl mx-auto'>
+            <p className="text-xl text-center">Please enter all required information to submit a work order ticket.</p>
           </section>
           <form 
             onSubmit={handleFormSubmission}
-            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-foreground w-full py-20"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-foreground w-full max-w-7xl mx-auto"
           >
             <div className='flex flex-col md:col-span-2'>
               <label className="text-md" htmlFor="first-name">

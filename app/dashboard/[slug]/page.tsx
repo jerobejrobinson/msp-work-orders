@@ -1,6 +1,6 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
-import { redirect, notFound } from "next/navigation"
+import { redirect, notFound, useRouter } from "next/navigation"
 import AdminActions from "./Actions"
 import BillingAction from "./BillingAction"
 import ProgressBar from "@/components/ProgressBar"
@@ -8,6 +8,8 @@ import WorkOrder from "@/components/WorkOrderComponent"
 import WorkOrderNotes from "@/components/WorkOrderNotes"
 import TestResults from "@/components/TestResults"
 import Images from "@/components/Images"
+import FedexTracking from "@/components/FedexTracking"
+import FedexShipping from "@/components/FedexShipping"
 
 interface TestResult {
     id: string,
@@ -49,9 +51,12 @@ interface Image {
 export const revalidate = 0
 
 export default async function Order({params}: { params: { slug: string }}) {
-
     const supabase = createServerComponentClient({ cookies })
-
+    // const cookieStore = cookies()
+    // if(!cookieStore.has('fedex')) {
+    //     await fetch(`${process.env.NEXT_PUBLIC_URL}/api/fedex`)
+        
+    // }
     const { data: { user }} = await supabase.auth.getUser()
     
     if(!user) {
@@ -76,9 +81,16 @@ export default async function Order({params}: { params: { slug: string }}) {
 
     const { data: customer, error: customerError } = await supabase.from('customer').select('*').eq('id', wo.customer_id).limit(1).single()
               
+    
     return (
-        <div className="h-main w-full bg-background flex flex-col items-center relative mt-16">
+        <div className="min-h-main w-full bg-background flex flex-col items-center relative mt-16">
             <AdminActions wo={wo} testRes={test_results} billing={billing} admin={admin} notes={notes}  images={images}/>
+            {wo.carrier == 'fedex' ? (
+                <>
+                    <FedexTracking wo={wo} />
+                    <FedexShipping wo={wo} />
+                </>
+            ) : ''}
             <ProgressBar wo={wo} test_results={test_results} billing={billing} />
             <WorkOrder wo={wo} />
             

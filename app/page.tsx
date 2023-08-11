@@ -21,7 +21,7 @@ export default async function Index() {
         <div>
           <Image
             src="/images/msp_office.jpg"
-            alt="MSP Diesel Solutions Main Building"
+            alt="MSP Diesel Solutions "
             width={495}
             height={512}
           />
@@ -31,7 +31,7 @@ export default async function Index() {
         <h2 className="text-4xl font-bold basis-full text-center">How It Works</h2>
         <div className="mr-16">
           <Image
-            src="/images/msp_warehouse.jpg"
+            src="/images/msp-fuel-shop-front-desk.webp"
             alt="MSP Diesel Solutions Warehouse"
             width={495}
             height={512}
@@ -41,7 +41,7 @@ export default async function Index() {
           <ol className="space-y-4">
             <li><strong>Work Order Submission</strong>: Submit a work order request online, from there we when send you a shipping with in 30 minutes.</li>
             <li><strong>Shiping Out</strong>: Ship your parts free of charge using our shipping label.</li>
-            <li><strong>Testing</strong>: Our skilled technicians will conduct a thorough assessment to determine the best course of action.</li>
+            <li><strong>Testing</strong>: With 4 testing rooms, our skilled technicians will conduct a thorough assessment to determine the best course of action.</li>
             <li><strong>Repair/Reman</strong>: We apply state-of-the-art techniques and replace worn parts to restore your fuel injectors and pumps to optimal conditions.</li>
             <li><strong>Delivered to Your Doorstep</strong>: Once complete, we promptly deliver your revitalized components, ready to breathe new life into your vehicle.</li>
           </ol>

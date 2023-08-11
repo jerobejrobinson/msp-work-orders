@@ -22,7 +22,7 @@ export default async function WorkOrderPage() {
 
     if(!workOrderData) {
         return (
-            <div>
+            <div className="min-h-main mt-16">
                 <p>No Active Work Orders</p>
                 <Link
                     href="/work-orders/create"

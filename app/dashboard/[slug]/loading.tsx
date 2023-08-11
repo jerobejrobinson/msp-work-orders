@@ -1,6 +1,6 @@
 export default function Loading() { 
     return (
-        <div className="min-h-screen w-full bg-background flex flex-col items-center relative mt-16">
+        <div className="min-h-main w-full bg-background flex flex-col items-center relative mt-16">
             <div className="w-full max-w-7xl py-8">
                 <div className="w-full flex justify-between">
                     <button
@@ -17,7 +17,9 @@ export default function Loading() {
                     </div>
                 </div>
             </div>
-            {/* <AdminActions wo={wo} testRes={test_results} billing={billing} admin={admin}/> */}
+            <div className="w-full max-w-7xl">
+                <button className="p-4 bg-btn-background rounded animate-pulse text-btn-background">Get Shipping Data</button>
+            </div>
             <div className="w-full max-w-7xl py-8">
                 <p className="text-xl font-bold flex flex-row justify-between">Status</p>
                 <div className="grid grid-cols-6 bg-white rounded border">

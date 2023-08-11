@@ -1,7 +1,7 @@
 import Link from "next/link"
 export default function NotFound() {
     return (
-        <div>
+        <div className="h-main mt-16 flex flex-col items-center justify-center space-y-4">
             <p>Your customer profile has not been set up please click the link below to continue.</p>
             <Link
                 href="/profile"

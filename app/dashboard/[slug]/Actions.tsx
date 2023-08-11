@@ -13,11 +13,13 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
     // Start Shipping Label
     const [shippingLabelClick, setShippingLabelClick] = useState<boolean>(false)
     const [shippingFile, setShippingFile] = useState<File | null>(null)
+    const [shippingTrackingNumber, setShippingTrackingNumber] = useState<string | null>(null)
     const handleShippingLabelClick = () => {
         setShippingLabelClick(prev => !prev)
     }
     const submitShippingLabel = async () => {
         if(!shippingFile) return toast.error("Need to upload a file before proceeding")
+        if(!shippingTrackingNumber) return toast.error("Need to include tracking number for label before proceeding")
 
         toast.loading('Uploading document.....')
         // Shipping file naming convention account-number_sl_date
@@ -34,7 +36,7 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
         
         const { data } = await supabase.storage.from('public').getPublicUrl(`shipping-labels/${shippingFile.name}`)
 
-        const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString(), return_shipping: data.publicUrl}).eq('id', wo.id)
+        const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString(), return_shipping: data.publicUrl, return_tracking_number: shippingTrackingNumber}).eq('id', wo.id)
 
         if(errorUpdate) {
             toast.dismiss()
@@ -463,6 +465,10 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
                         if(e.target.files !== null)
                         setShippingFile(e.target.files[0])
                     }}/>
+                    <p className="mt-4">Enter Tracking Number</p>
+                    <input type="text" name="shippingNumber" id="shippingNumber" onChange={(e) => {
+                        setShippingTrackingNumber(e.target.value)
+                    }} className="border p-2 rounded"/>
                 </div>
             )}
             {numberClicked && (

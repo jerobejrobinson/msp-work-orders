@@ -64,7 +64,7 @@ export async function GET(request: Request) {
                     }
                 ],
                 dynamic_template_data: {
-                    "admin": `${admin.first_name} ${admin.last_name}`,
+                    "admin": `${admin.first_name}`,
                     "note": note.note,
                     "number": wo.number,
                     "url": `${process.env.NEXT_PUBLIC_URL}/work-orders/${wo.id}`

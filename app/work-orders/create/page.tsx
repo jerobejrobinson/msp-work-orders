@@ -296,7 +296,7 @@ export default function Form() {
                         <label htmlFor="reman" className='cursor-pointer'>Reman</label>
                     </div>
                 </div>
-                <button type="submit" className={`bg-main w-full p-4 text-white text-lg font-bold ${submitState ? 'animate-pulse' : ''}`} onClick={() => setSubmitState(prev => !prev)}>
+                <button type="submit" className={`bg-main rounded w-full p-4 text-white text-lg font-bold ${submitState ? 'animate-pulse' : ''}`} onClick={() => setSubmitState(prev => !prev)} disabled={submitState}>
                     {submitState ? "Submitting..." : "Submit Work Order"}
                 </button>
             </form>
