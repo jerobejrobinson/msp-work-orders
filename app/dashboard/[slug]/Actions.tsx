@@ -161,89 +161,112 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
     const [billingFile, setBillingFile] = useState<File | null>(null)
     const [billingAmount, setBillingAmount] = useState<string | null>(null)
     const [billingNotes, setBillingNotes] = useState<string | null>(null)
-    const [billingInvoice, setBillingInvoice] = useState<string | null>(null)
+    const [billingInvoice, setBillingInvoice] = useState<number | null>(null)
     const handleBillingClick = () => {
         setBillingClick(prev => !prev)
     }
     const submitBillingInformation = async () => {
-        if(!billingFile) return toast.error('Need to upload a file before proceeding')
-        toast.loading('Uploading file.....')
-        const { error } = await supabase.storage.from('public').upload(`${wo.number}/billing/${billingFile.name}`, billingFile, {
-            cacheControl: '3600',
-            upsert: false
-        })
-        
-        if(error) {
-            toast.dismiss()
-            toast.error(error.message)
-            return
-        }
-
-        const { data } = await supabase.storage.from('public').getPublicUrl(`${wo.number}/billing/${billingFile.name}`)
-
-        if(wo.type === 'test only') {
-            const { data: billing, error: errorUpload } = await supabase.from('billing').insert({wo_id: wo.id, link: data.publicUrl, notes: billingNotes, admin_id: admin.id, amount: billingAmount, approved: true, approved_at: new Date().toISOString(), invoice: billingInvoice}).select()
-
-            if(errorUpload) {
-                toast.dismiss()
-                toast.error(errorUpload.message)
-                return
-            }
-
-            const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString()}).eq('id', wo.id)
-
-            if(errorUpdate) {
-                toast.dismiss()
-                toast.error(errorUpdate.message)
-                return
-            }
-
-            toast.dismiss()
-            await fetch(`/dashboard/get/api/email/send-billing?id=${wo.id}&an=${admin.id}&bId=${billing[0].id}`)
-            await fetch(`/dashboard/admin/api/log`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    id: wo.id,
-                    aId: admin.id,
-                    type: 'Uploaded a test only bill to work order'
-                })
+        const PDF = await fetch(`/api/dist/getQuotePDF`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                orderNumber: billingInvoice
             })
-            toast.success('Billing file uploaded')
-            handleBillingClick()
-            router.refresh()
-        } else {
-            const { data: billing, error: errorUpload } = await supabase.from('billing').insert({wo_id: wo.id, link: data.publicUrl, notes: billingNotes, admin_id: admin.id, amount: billingAmount, approved: null, invoice: billingInvoice}).select()
-
-            if(errorUpload) {
-                toast.dismiss()
-                toast.error(errorUpload.message)
-                return
-            }
-
-            const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString()}).eq('id', wo.id)
-
-            if(errorUpdate) {
-                toast.dismiss()
-                toast.error(errorUpdate.message)
-                return
-            }
-
-            toast.dismiss()
-            await fetch(`/dashboard/get/api/email/send-billing?id=${wo.id}&an=${admin.id}&bId=${billing[0].id}`)
-            await fetch(`/dashboard/admin/api/log`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    id: wo.id,
-                    aId: admin.id,
-                    type: 'Uploaded a repair/reman bill to work order'
-                })
+        }).then(data => data.json())
+        console.log(PDF.url)
+        const OrderData = await fetch(`/api/dist/getOrderData`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                    orderNumber: billingInvoice,
+                    orderSuffix: 0
             })
-            toast.success('Billing file uploaded')
-            handleBillingClick()
-            router.refresh()
-        }
-        
+        }).then(data => data.json())
+        console.log(OrderData.amount)
     }
+    // const submitBillingInformation = async () => {
+    //     if(!billingFile) return toast.error('Need to upload a file before proceeding')
+    //     toast.loading('Uploading file.....')
+    //     const { error } = await supabase.storage.from('public').upload(`${wo.number}/billing/${billingFile.name}`, billingFile, {
+    //         cacheControl: '3600',
+    //         upsert: false
+    //     })
+        
+    //     if(error) {
+    //         toast.dismiss()
+    //         toast.error(error.message)
+    //         return
+    //     }
+
+    //     const { data } = await supabase.storage.from('public').getPublicUrl(`${wo.number}/billing/${billingFile.name}`)
+
+    //     if(wo.type === 'test only') {
+    //         const { data: billing, error: errorUpload } = await supabase.from('billing').insert({wo_id: wo.id, link: data.publicUrl, notes: billingNotes, admin_id: admin.id, amount: billingAmount, approved: true, approved_at: new Date().toISOString(), invoice: billingInvoice}).select()
+
+    //         if(errorUpload) {
+    //             toast.dismiss()
+    //             toast.error(errorUpload.message)
+    //             return
+    //         }
+
+    //         const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString()}).eq('id', wo.id)
+
+    //         if(errorUpdate) {
+    //             toast.dismiss()
+    //             toast.error(errorUpdate.message)
+    //             return
+    //         }
+
+    //         toast.dismiss()
+    //         await fetch(`/dashboard/get/api/email/send-billing?id=${wo.id}&an=${admin.id}&bId=${billing[0].id}`)
+    //         await fetch(`/dashboard/admin/api/log`, {
+    //             method: 'POST',
+    //             body: JSON.stringify({
+    //                 id: wo.id,
+    //                 aId: admin.id,
+    //                 type: 'Uploaded a test only bill to work order'
+    //             })
+    //         })
+    //         toast.success('Billing file uploaded')
+    //         handleBillingClick()
+    //         router.refresh()
+    //     } else {
+    //         const { data: billing, error: errorUpload } = await supabase.from('billing').insert({wo_id: wo.id, link: data.publicUrl, notes: billingNotes, admin_id: admin.id, amount: billingAmount, approved: null, invoice: billingInvoice}).select()
+
+    //         if(errorUpload) {
+    //             toast.dismiss()
+    //             toast.error(errorUpload.message)
+    //             return
+    //         }
+
+    //         const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString()}).eq('id', wo.id)
+
+    //         if(errorUpdate) {
+    //             toast.dismiss()
+    //             toast.error(errorUpdate.message)
+    //             return
+    //         }
+
+    //         toast.dismiss()
+    //         await fetch(`/dashboard/get/api/email/send-billing?id=${wo.id}&an=${admin.id}&bId=${billing[0].id}`)
+    //         await fetch(`/dashboard/admin/api/log`, {
+    //             method: 'POST',
+    //             body: JSON.stringify({
+    //                 id: wo.id,
+    //                 aId: admin.id,
+    //                 type: 'Uploaded a repair/reman bill to work order'
+    //             })
+    //         })
+    //         toast.success('Billing file uploaded')
+    //         handleBillingClick()
+    //         router.refresh()
+    //     }
+        
+    // }
     
     // End Billing
     // Start Images
@@ -386,7 +409,7 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
                 <div className="flex flex-row gap-4">
                 {/* Start Add Note Action */}
                 {!noteClicked ? (
-                    <BtnAction click={handleNoteClick} name="Note" />
+                    <BtnAction click={handleNoteClick} name="Add Note" />
                     ):(<BtnOptions click={handleNoteClick} submit={submitNote} name="Note" />)}
                 {/* End Add Note Action */}
                 {/* Start Add Note Action */}
@@ -398,35 +421,35 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
                 {/* End Add Note Action */}
                 {/* Start Return Shipping Action */}
                 {wo.return_shipping ? '' : !shippingLabelClick ? (
-                    <BtnAction click={handleShippingLabelClick} name="Shipping Label" />
+                    <BtnAction click={handleShippingLabelClick} name="Add Shipping Label" />
                 ):(<BtnOptions click={handleShippingLabelClick} submit={submitShippingLabel} name="Shipping Label" />)}
                 {/* End Return Shipping Action */}
                 {/* Start Add Images  */}
                 {wo.number === "pending" ? '' : !imagesBtn ? (
-                    <BtnAction click={handleImgBtn} name="Images" />
+                    <BtnAction click={handleImgBtn} name="Add Images" />
                 ): (<BtnOptions click={handleImgBtn} submit={submitImages} name="Images" />)}
                 {/* End Add Images  */}
                 {/* Start Add Work Order Number */}
                 {!wo.return_shipping ? '' : !numberClicked && wo.number === "pending" ? ( 
-                    <BtnAction click={handleNumberClick} name="Work Order Number" /> )
+                    <BtnAction click={handleNumberClick} name="Add Work Order Number" /> )
                 : wo.number === "pending" ? (<BtnOptions click={handleNumberClick} submit={updateWorkOrderNumber} name="Work Order Number" />) : ('')}
                 {/* End Add Note Action */}
 
                 {/* Start Upload Test Reseults */}
                     {(wo.number === "pending" || testRes?.length) ? '' 
-                    : !testClicked ? ( <BtnAction click={handleTestClick} name="Test Results" /> )
+                    : !testClicked ? ( <BtnAction click={handleTestClick} name="Add Test Results" /> )
                     : (<BtnOptions click={handleTestClick} submit={handleTestResultSubmission} name="Test Results" />)}
                 {/* End Upload Test Reseults */}
                 {/* Start Upload Billing */}
                     {!testRes?.length ? '' :
                     testRes?.length && !billing && !billingClick ? 
-                    ( <BtnAction click={handleBillingClick} name="Billing" /> )
+                    ( <BtnAction click={handleBillingClick} name="Add Billing" /> )
                     : !billing ? (<BtnOptions click={handleBillingClick} submit={submitBillingInformation} name="Billing" />) : ''}
                 {/* End Upload Billing */}
                 {/* Start Upload Tracking Number */}
                     {
                         !wo.tracking_number && billing && billing.approved ? 
-                            !trackingNumberClick ? (<BtnAction click={handleTrackingNumberClick} name="Tracking Number" />) : 
+                            !trackingNumberClick ? (<BtnAction click={handleTrackingNumberClick} name="Add Tracking Number" />) : 
                             (<BtnOptions click={handleTrackingNumberClick} submit={trackingNumberAction} name="Tracking Number" />) 
                         : '' 
                     }
@@ -520,7 +543,7 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
                         type="text" 
                         name="billingInvoice" 
                         id="billingInvoice" 
-                        onChange={(e) => setBillingInvoice(e.target.value)}
+                        onChange={(e) => setBillingInvoice(Number(e.target.value))}
                         className="rounded-md px-4 py-2 bg-inherit border mb-6 bg-white" 
                     />
                     <p>Notes</p>
@@ -572,7 +595,7 @@ function BtnAction({click, name}: {click: any, name: string}) {
             className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover flex flex-row items-center"
             onClick={click}
         >
-            Add {name}
+            {name}
         </button>
     )
 }
