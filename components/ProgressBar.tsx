@@ -49,8 +49,10 @@ export default async function ProgressBar({wo, test_results, billing}: {wo: any,
         if(!billing) return ''
         if(billing.approved && !wo.tracking_number) {
             return 'bg-greenLight text-white animate-pulse'
-        }else {
+        }else if(billing.approved && wo.tracking_number) {
             return 'bg-greenLight text-white'
+        } else {
+            return ''
         }
     }
     return (

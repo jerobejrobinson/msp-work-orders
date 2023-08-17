@@ -53,12 +53,12 @@ export async function GET(request: Request) {
                     }
                 ],
                 dynamic_template_data: {
-                    "admin": `${admin.first_name} ${admin.last_name}`,
+                    "admin": `${admin.first_name}`,
                     "url": wo.return_shipping
                 }
             }
         ],
-        template_id: "d-8c130dc8c36548a7a94224db4d9f3cab"
+        template_id: "d-02a8603840494bd085465255e74f6def"
     }
 
     // @ts-ignore

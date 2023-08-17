@@ -8,7 +8,7 @@ interface Body {
     orderSuffix: number
 }
 
-export async function POST(request: Request) {
+export async function POST(request: Request) {  
     const { customerNumber, orderNumber, orderSuffix } : Body = await request.json()
     const cookieList = cookies()
     const token = cookieList.get('dist')
@@ -36,5 +36,8 @@ export async function POST(request: Request) {
         })
     }).then(data => data.json())
    
-    return NextResponse.json({status: 200, amount: data.response.tOrderhdrtrans['t-orderhdrtrans'][0].totordamt})
+    if(data.response.tOrderhdrtrans['t-orderhdrtrans'].length == 0) {
+        return NextResponse.json({status: 404, error: "Order number not found"})
+    }
+    return NextResponse.json({status: 200, amount: data.response.tOrderhdrtrans['t-orderhdrtrans'][0].totordamt, error: null})
 }

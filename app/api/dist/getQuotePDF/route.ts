@@ -7,6 +7,15 @@ interface Body {
 }
 
 export async function POST(request: Request) {
+    // const supabase = await createRouteHandlerClient({ cookies })
+
+    // const { data: users} = await supabase.auth.getUser()
+    // const { error } = await supabase.from('admin').select().eq('user_id', users.user?.id).limit(1).single()
+
+    // if(error) {
+    //     return NextResponse.json({error: 'access not authorized'})
+    // }
+
     const { orderNumber } : Body = await request.json()
     const cookieList = cookies()
     const token = cookieList.get('dist')

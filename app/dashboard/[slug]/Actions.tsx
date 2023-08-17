@@ -142,7 +142,7 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
 
         if(errorUpdate) return console.error(errorUpdate.message)
 
-        await fetch(`/dashboard/get/api/email/send-test?id=${wo.id}&an=${admin.id}&tId=${testData[0].id}`)
+        await fetch(`/dashboard/get/api/email/send-tests?id=${wo.id}&an=${admin.id}&tId=${testData[0].id}`)
         await fetch(`/dashboard/admin/api/log`, {
             method: 'POST',
             body: JSON.stringify({
@@ -158,14 +158,13 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
     // End Work Order Tests
     // Start Billing
     const [billingClick, setBillingClick] = useState<boolean>(false)
-    const [billingFile, setBillingFile] = useState<File | null>(null)
-    const [billingAmount, setBillingAmount] = useState<string | null>(null)
     const [billingNotes, setBillingNotes] = useState<string | null>(null)
     const [billingInvoice, setBillingInvoice] = useState<number | null>(null)
     const handleBillingClick = () => {
         setBillingClick(prev => !prev)
     }
     const submitBillingInformation = async () => {
+        toast.loading('Getting PDF')
         const PDF = await fetch(`/api/dist/getQuotePDF`, {
             method: 'POST',
             headers: {
@@ -175,8 +174,14 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
                 orderNumber: billingInvoice
             })
         }).then(data => data.json())
-        console.log(PDF.url)
-        const OrderData = await fetch(`/api/dist/getOrderData`, {
+        if(!PDF.url) {
+            toast.dismiss()
+            toast.error('PDF Document not found. Check order number')
+            return
+        }
+        toast.dismiss()
+        toast.loading('Getting Order Data')
+        const { amount, error } = await fetch(`/api/dist/getOrderData`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -186,88 +191,74 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
                     orderSuffix: 0
             })
         }).then(data => data.json())
-        console.log(OrderData.amount)
+        if(error) {
+            toast.dismiss()
+            toast.error(error)
+            return
+        }
+
+        if(wo.type === 'test only') {
+            const { data: billing, error: errorUpload } = await supabase.from('billing').insert({wo_id: wo.id, link: PDF.url, notes: billingNotes, admin_id: admin.id, amount: amount, approved: true, approved_at: new Date().toISOString(), invoice: billingInvoice}).select()
+
+            if(errorUpload) {
+                toast.dismiss()
+                toast.error(errorUpload.message)
+                return
+            }
+
+            const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString()}).eq('id', wo.id)
+
+            if(errorUpdate) {
+                toast.dismiss()
+                toast.error(errorUpdate.message)
+                return
+            }
+
+            toast.dismiss()
+            await fetch(`/dashboard/get/api/email/send-billing?id=${wo.id}&an=${admin.id}&bId=${billing[0].id}`)
+            await fetch(`/dashboard/admin/api/log`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    id: wo.id,
+                    aId: admin.id,
+                    type: 'Uploaded a test only bill to work order'
+                })
+            })
+            toast.success('Billing file uploaded')
+            handleBillingClick()
+            router.refresh()
+        } else {
+            const { data: billing, error: errorUpload } = await supabase.from('billing').insert({wo_id: wo.id, link: PDF.url, notes: billingNotes, admin_id: admin.id, amount: amount, approved: null, invoice: billingInvoice}).select()
+
+            if(errorUpload) {
+                toast.dismiss()
+                toast.error(errorUpload.message)
+                return
+            }
+
+            const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString()}).eq('id', wo.id)
+
+            if(errorUpdate) {
+                toast.dismiss()
+                toast.error(errorUpdate.message)
+                return
+            }
+
+            toast.dismiss()
+            await fetch(`/dashboard/get/api/email/send-billing?id=${wo.id}&an=${admin.id}&bId=${billing[0].id}`)
+            await fetch(`/dashboard/admin/api/log`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    id: wo.id,
+                    aId: admin.id,
+                    type: 'Uploaded a repair/reman bill to work order'
+                })
+            })
+            toast.success('Billing file uploaded')
+            handleBillingClick()
+            router.refresh()
+        }
     }
-    // const submitBillingInformation = async () => {
-    //     if(!billingFile) return toast.error('Need to upload a file before proceeding')
-    //     toast.loading('Uploading file.....')
-    //     const { error } = await supabase.storage.from('public').upload(`${wo.number}/billing/${billingFile.name}`, billingFile, {
-    //         cacheControl: '3600',
-    //         upsert: false
-    //     })
-        
-    //     if(error) {
-    //         toast.dismiss()
-    //         toast.error(error.message)
-    //         return
-    //     }
-
-    //     const { data } = await supabase.storage.from('public').getPublicUrl(`${wo.number}/billing/${billingFile.name}`)
-
-    //     if(wo.type === 'test only') {
-    //         const { data: billing, error: errorUpload } = await supabase.from('billing').insert({wo_id: wo.id, link: data.publicUrl, notes: billingNotes, admin_id: admin.id, amount: billingAmount, approved: true, approved_at: new Date().toISOString(), invoice: billingInvoice}).select()
-
-    //         if(errorUpload) {
-    //             toast.dismiss()
-    //             toast.error(errorUpload.message)
-    //             return
-    //         }
-
-    //         const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString()}).eq('id', wo.id)
-
-    //         if(errorUpdate) {
-    //             toast.dismiss()
-    //             toast.error(errorUpdate.message)
-    //             return
-    //         }
-
-    //         toast.dismiss()
-    //         await fetch(`/dashboard/get/api/email/send-billing?id=${wo.id}&an=${admin.id}&bId=${billing[0].id}`)
-    //         await fetch(`/dashboard/admin/api/log`, {
-    //             method: 'POST',
-    //             body: JSON.stringify({
-    //                 id: wo.id,
-    //                 aId: admin.id,
-    //                 type: 'Uploaded a test only bill to work order'
-    //             })
-    //         })
-    //         toast.success('Billing file uploaded')
-    //         handleBillingClick()
-    //         router.refresh()
-    //     } else {
-    //         const { data: billing, error: errorUpload } = await supabase.from('billing').insert({wo_id: wo.id, link: data.publicUrl, notes: billingNotes, admin_id: admin.id, amount: billingAmount, approved: null, invoice: billingInvoice}).select()
-
-    //         if(errorUpload) {
-    //             toast.dismiss()
-    //             toast.error(errorUpload.message)
-    //             return
-    //         }
-
-    //         const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString()}).eq('id', wo.id)
-
-    //         if(errorUpdate) {
-    //             toast.dismiss()
-    //             toast.error(errorUpdate.message)
-    //             return
-    //         }
-
-    //         toast.dismiss()
-    //         await fetch(`/dashboard/get/api/email/send-billing?id=${wo.id}&an=${admin.id}&bId=${billing[0].id}`)
-    //         await fetch(`/dashboard/admin/api/log`, {
-    //             method: 'POST',
-    //             body: JSON.stringify({
-    //                 id: wo.id,
-    //                 aId: admin.id,
-    //                 type: 'Uploaded a repair/reman bill to work order'
-    //             })
-    //         })
-    //         toast.success('Billing file uploaded')
-    //         handleBillingClick()
-    //         router.refresh()
-    //     }
-        
-    // }
-    
     // End Billing
     // Start Images
     const [imagesBtn, SetImagesBtn] = useState<boolean>(false)
@@ -519,25 +510,6 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
             )}
             {billingClick && (
                 <div className="w-full p-4 border rounded bg-white shadow">
-                    <p>Upload PDF File</p>
-                    <input 
-                        type="file" 
-                        name="billingFile" 
-                        id="billingFile" 
-                        onChange={(e) => {
-                            if(e.target.files !== null)
-                            setBillingFile(e.target.files[0])
-                        }}
-                        className="rounded-md px-4 py-2 bg-inherit border mb-6 bg-white"
-                    />
-                    <p>Amount</p>
-                    <input 
-                        type="number" 
-                        name="billingAmount" 
-                        id="billingAmount" 
-                        onChange={(e) => setBillingAmount(e.target.value)}
-                        className="rounded-md px-4 py-2 bg-inherit border mb-6 bg-white" 
-                    />
                     <p>CSD Invoice Number</p>
                     <input 
                         type="text" 

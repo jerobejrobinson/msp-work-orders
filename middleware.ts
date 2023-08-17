@@ -14,6 +14,13 @@ export async function middleware(req: NextRequest) {
   await supabase.auth.getSession()
 
   if (req.nextUrl.pathname.startsWith('/api/dist')) {
+    const { data: users} = await supabase.auth.getUser()
+    const { error } = await supabase.from('admin').select().eq('user_id', users.user?.id).limit(1).single()
+
+    if(error) {
+      return NextResponse.json({error: 'access not authorized'})
+    }
+
     let cookie = req.cookies.get('dist')
     if(!cookie) {
       // get cookie

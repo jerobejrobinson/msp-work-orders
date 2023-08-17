@@ -32,12 +32,12 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
     const an = searchParams.get('an')
-    const tId = searchParams.get('tId')
+    const bId = searchParams.get('tId')
     
     // @ts-ignore
     const { data: wo, error: woError } = await supabase.from('work_order').select('id, number, type, customer ( email, first_name, last_name )').eq('id', id).limit(1).single<WorkOrder>()
     
-    const { data: billing, error: billingError } = await supabase.from('billing').select('note').eq('id', tId).limit(1).single<Billing>()
+    const { data: billing, error: billingError } = await supabase.from('billing').select('note').eq('id', bId).limit(1).single<Billing>()
 
     const { data: admin, error: adminError } = await supabase.from('admin').select('first_name, last_name').eq('id', an).limit(1).single<Admin>()
 
@@ -46,7 +46,7 @@ export async function GET(request: Request) {
         return NextResponse.json({status: 500, msg: "Could not retreive work order."})
     }
     if(billingError) {
-        return NextResponse.json({status: 500, msg: "Could not retreive note"})
+        return NextResponse.json({status: 500, msg: "Could not retreive billing"})
     }
     if(adminError) {
         console.log(adminError)
@@ -78,7 +78,14 @@ export async function GET(request: Request) {
     }
 
     // @ts-ignore
-    await sgMail.send(msg)
+    await sgMail.send(msg).then((response) => {
+        console.log(response[0].statusCode)
+        console.log(response[0].headers)
+        
+      })
+      .catch((error) => {
+        console.error(error)
+      })
 
     return NextResponse.json({status: 200})
 }
