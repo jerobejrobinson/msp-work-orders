@@ -43,12 +43,11 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
         }
 
         toast.dismiss()
-        await fetch(`/dashboard/get/api/email/send-shipping-label?id=${wo.id}&an=${admin.id}`)
+        await fetch(`/dashboard/get/api/email/send-shipping-label?id=${wo.id}`)
         await fetch(`/dashboard/admin/api/log`, {
             method: 'POST',
             body: JSON.stringify({
                 id: wo.id,
-                aId: admin.id,
                 type: 'Uploaded the shipping label to work order.'
             })
         })
@@ -73,12 +72,11 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
             return;
         }
         toast.dismiss()
-        await fetch(`/dashboard/get/api/email/send-note?id=${wo.id}&an=${admin.id}&nId=${data[0].id}`)
+        await fetch(`/dashboard/get/api/email/send-note?id=${wo.id}&nId=${data[0].id}`)
         await fetch(`/dashboard/admin/api/log`, {
             method: 'POST',
             body: JSON.stringify({
                 id: wo.id,
-                aId: admin.id,
                 type: 'Uploaded a note to work order'
             })
         })
@@ -102,12 +100,11 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
             return;
         }
         toast.dismiss()
-        await fetch(`/dashboard/get/api/email/send-wo-number?id=${wo.id}&an=${admin.id}`)
+        await fetch(`/dashboard/get/api/email/send-wo-number?id=${wo.id}`)
         await fetch(`/dashboard/admin/api/log`, {
             method: 'POST',
             body: JSON.stringify({
                 id: wo.id,
-                aId: admin.id,
                 type: 'Updated the work order number. WO is now WO-' + wo.number
             })
         })
@@ -142,12 +139,11 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
 
         if(errorUpdate) return console.error(errorUpdate.message)
 
-        await fetch(`/dashboard/get/api/email/send-tests?id=${wo.id}&an=${admin.id}&tId=${testData[0].id}`)
+        await fetch(`/dashboard/get/api/email/send-tests?id=${wo.id}&tId=${testData[0].id}`)
         await fetch(`/dashboard/admin/api/log`, {
             method: 'POST',
             body: JSON.stringify({
                 id: wo.id,
-                aId: admin.id,
                 type: 'Uploaded test results to work order'
             })
         })
@@ -215,12 +211,11 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
             }
 
             toast.dismiss()
-            await fetch(`/dashboard/get/api/email/send-billing?id=${wo.id}&an=${admin.id}&bId=${billing[0].id}`)
+            await fetch(`/dashboard/get/api/email/send-billing?id=${wo.id}&bId=${billing[0].id}`)
             await fetch(`/dashboard/admin/api/log`, {
                 method: 'POST',
                 body: JSON.stringify({
                     id: wo.id,
-                    aId: admin.id,
                     type: 'Uploaded a test only bill to work order'
                 })
             })
@@ -245,12 +240,11 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
             }
 
             toast.dismiss()
-            await fetch(`/dashboard/get/api/email/send-billing?id=${wo.id}&an=${admin.id}&bId=${billing[0].id}`)
+            await fetch(`/dashboard/get/api/email/send-billing?id=${wo.id}&bId=${billing[0].id}`)
             await fetch(`/dashboard/admin/api/log`, {
                 method: 'POST',
                 body: JSON.stringify({
                     id: wo.id,
-                    aId: admin.id,
                     type: 'Uploaded a repair/reman bill to work order'
                 })
             })
@@ -373,7 +367,7 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
             return;
         }
         toast.dismiss()
-        await fetch(`/dashboard/get/api/email/send-tracking-number?id=${wo.id}&an=${admin.id}`)
+        await fetch(`/dashboard/get/api/email/send-tracking-number?id=${wo.id}`)
         await fetch(`/dashboard/admin/api/log`, {
             method: 'POST',
             body: JSON.stringify({

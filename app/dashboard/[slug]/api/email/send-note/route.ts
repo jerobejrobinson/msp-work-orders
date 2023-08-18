@@ -28,16 +28,15 @@ export async function GET(request: Request) {
     const supabase = createRouteHandlerClient({ cookies })
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
-    const an = searchParams.get('an')
     const nId = searchParams.get('nId')
     
-    console.log(id, an, nId)
+    const { data } = await supabase.auth.getUser()
     // @ts-ignore
     const { data: wo, error: woError } = await supabase.from('work_order').select('id, number, customer ( email, first_name, last_name )').eq('id', id).limit(1).single<WorkOrder>()
     
     const { data: note, error: noteError } = await supabase.from('note').select('note').eq('id', nId).limit(1).single<Note>()
 
-    const { data: admin, error: adminError } = await supabase.from('admin').select('first_name, last_name').eq('id', an).limit(1).single<Admin>()
+    const { data: admin, error: adminError } = await supabase.from('admin').select('first_name, last_name').eq('user_id', data.user?.id).limit(1).single<Admin>()
 
     if(woError) {
         console.log(woError)

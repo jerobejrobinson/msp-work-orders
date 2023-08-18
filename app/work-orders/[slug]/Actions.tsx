@@ -9,6 +9,7 @@ export default function CustomerActions({wo, customer_id, billing, testing}: {wo
     const supabase = createClientComponentClient()
     const router = useRouter()
 
+    console.log(wo.type)
     const [clicked, setClicked ] = useState<boolean>(false)
     const [note, setNote] = useState<string | null>(null)
     const handleNoteClick = () => {
@@ -134,9 +135,11 @@ export default function CustomerActions({wo, customer_id, billing, testing}: {wo
                         <BtnOptions click={handleTypeClick} submit={updateType} name="Order Type"/>
                     ) 
                 }
-                {!billing ? '' :
-                    billing.approval !== null ? '' : 
-                    wo.type !== 'test only' && !billingClick ? (
+                {   
+                    wo.type == 'test only' ? "" : 
+                    !billing ? '' :
+                    billing.approved !== null ? '' : 
+                    !billingClick ? (
                         <BtnAction click={handleBillingClick} name="Approve Billing" />
                     ): (
                         <BtnOptions click={handleBillingClick} submit={submitApproval} name="Billing"/>

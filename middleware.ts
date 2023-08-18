@@ -13,6 +13,17 @@ export async function middleware(req: NextRequest) {
   // https://supabase.com/docs/guides/auth/auth-helpers/nextjs#managing-session-with-middleware
   await supabase.auth.getSession()
 
+  if (req.nextUrl.pathname.startsWith('/dashboard')) {
+    const { data} = await supabase.auth.getUser()
+    const { error } = await supabase.from('admin').select().eq('user_id', data.user?.id).limit(1).single()
+
+    if(error) {
+      return NextResponse.redirect(process.env.NEXT_PUBLIC_URL)
+    }
+    
+    return res
+  }
+
   if (req.nextUrl.pathname.startsWith('/api/dist')) {
     const { data: users} = await supabase.auth.getUser()
     const { error } = await supabase.from('admin').select().eq('user_id', users.user?.id).limit(1).single()
