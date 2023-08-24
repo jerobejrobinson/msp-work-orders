@@ -8,8 +8,7 @@ import { Toaster, toast } from "react-hot-toast"
 export default function CustomerActions({wo, customer_id, billing, testing}: {wo: any, customer_id: string, billing: any, testing: any}) {
     const supabase = createClientComponentClient()
     const router = useRouter()
-
-    console.log(wo.type)
+    
     const [clicked, setClicked ] = useState<boolean>(false)
     const [note, setNote] = useState<string | null>(null)
     const handleNoteClick = () => {
@@ -191,7 +190,7 @@ export default function CustomerActions({wo, customer_id, billing, testing}: {wo
             )}
             {billingClick && (
                 <div className="w-full p-4 bg-white rounded mt-4 space-y-4 border shadow">
-                    <Link href={billing.link} className="font-bold">Click To View Bill</Link>
+                    <Link href={billing.link} rel="noopener noreferrer" target="_blank" className="font-bold" >Click To View Bill</Link>
                     <p>Amount: {billing.amount}</p>
                     <div>
                         <label htmlFor="billingTrue">Approve: </label>

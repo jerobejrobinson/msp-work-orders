@@ -6,18 +6,12 @@ import sgMail from '@sendgrid/mail'
 interface WorkOrder {
     id: string
     number: string
-    type: string
+    tracking_number: string
     customer: {
         email: string
         first_name: string
         last_name: string
     }
-}
-
-interface Billing {
-    id: string,
-    note: string,
-    link: string
 }
 
 interface Admin {
@@ -26,6 +20,10 @@ interface Admin {
     last_name: string
 }
 
+interface Billing {
+    id: string,
+    link: string
+}
 export async function GET(request: Request) {
     sgMail.setApiKey(process.env.NEXT_PUBLIC_SENDGRID_API_KEY)
     const supabase = createRouteHandlerClient({ cookies })
@@ -34,21 +32,21 @@ export async function GET(request: Request) {
     const bId = searchParams.get('bId')
     
     const { data } = await supabase.auth.getUser()
-
-    // @ts-ignore
-    const { data: wo, error: woError } = await supabase.from('work_order').select('id, number, type, customer ( email, first_name, last_name )').eq('id', id).limit(1).single<WorkOrder>()
-    
-    const { data: billing, error: billingError } = await supabase.from('billing').select('note').eq('id', bId).limit(1).single<Billing>()
-
     const { data: admin, error: adminError } = await supabase.from('admin').select('first_name, last_name').eq('user_id', data.user?.id).limit(1).single<Admin>()
+    
+    // @ts-ignore
+    const { data: wo, error: woError } = await supabase.from('work_order').select('id, number, tracking_number, customer ( email, first_name, last_name )').eq('id', id).limit(1).single<WorkOrder>()
+    const { data: billing, error: billingError } = await supabase.from('billing').select('id, link').eq('id', bId).limit(1).single<Billing>()
 
     if(woError) {
         console.log(woError)
         return NextResponse.json({status: 500, msg: "Could not retreive work order."})
     }
     if(billingError) {
-        return NextResponse.json({status: 500, msg: "Could not retreive billing"})
+        console.log(billingError)
+        return NextResponse.json({status: 500, msg: "Could not retreive billing."})
     }
+
     if(adminError) {
         console.log(adminError)
         return NextResponse.json({status: 500, msg: "error retreiving a"})
@@ -68,25 +66,16 @@ export async function GET(request: Request) {
                 dynamic_template_data: {
                     "admin": `${admin.first_name}`,
                     "number": wo.number,
-                    "woUrl": `${process.env.NEXT_PUBLIC_URL}/work-orders/${wo.id}`,
-                    "billingUrl": billing.link,
+                    "invoiceUrl": billing.link,
                     "customerName": wo.customer.first_name,
-                    "type": wo.type
                 }
             }
         ],
-        template_id: "d-fbd226e116de49e1afec11ef8768407d"
+        template_id: "d-d0a31a025b2043728b47a248b0b4455a"
     }
 
     // @ts-ignore
-    await sgMail.send(msg).then((response) => {
-        console.log(response[0].statusCode)
-        console.log(response[0].headers)
-        
-      })
-      .catch((error) => {
-        console.error(error)
-      })
+    await sgMail.send(msg)
 
     return NextResponse.json({status: 200})
 }

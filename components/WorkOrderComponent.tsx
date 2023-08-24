@@ -37,7 +37,7 @@ export default async function WorkOrder({ wo }: { wo: any}) {
                     </div>
                     <div className="flex flex-col">
                         <div className="font-bold">Shipping Label</div>
-                        {wo.return_shipping && <Link href={wo.return_shipping}>Download Label</Link>}
+                        {wo.return_shipping && <Link href={wo.return_shipping} rel="noopener noreferrer" target="_blank">Download Label</Link>}
                     </div>
                 </div>
             </div>

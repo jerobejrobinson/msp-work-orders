@@ -140,7 +140,7 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
         if(errorUpdate) return console.error(errorUpdate.message)
 
         await fetch(`/dashboard/get/api/email/send-tests?id=${wo.id}&tId=${testData[0].id}`)
-        await fetch(`/dashboard/admin/api/log`, {
+        await fetch(`/dashboard/test/api/log`, {
             method: 'POST',
             body: JSON.stringify({
                 id: wo.id,
@@ -358,7 +358,7 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
         setTrackingNumberClick(prev => !prev)
     }
     const trackingNumberAction = async () => {
-        toast.loading('Submiting...')
+        toast.loading('Submiting Tracking Number...')
         if(!trackingNumberInput) return toast.error('Must provide a value before submitting tracking number')
         const { error } = await supabase.from('work_order').update({last_update_at: new Date().toISOString(), tracking_number: trackingNumberInput }).eq('id', wo.id)
         if(error) {
@@ -376,11 +376,50 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
                 type: 'Uploaded tracking number'
             })
         })
-        toast.success('Tracking Number')
+        toast.success('Tracking Number Added')
         handleTrackingNumberClick()
         router.refresh()
     }
     // end tracking number
+    // start send invoice
+    const sendInvoiceAction = async () => {
+        toast.loading(`Getting Invoice ${billing.invoice}From CSD...`)
+        const PDF = await fetch(`/api/dist/getInvoicePDF`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                orderNumber: billing.invoice
+            })
+        }).then(data => data.json())
+        if(!PDF.url) {
+            toast.dismiss()
+            toast.error('PDF Document not found. Check order number')
+            return
+        }
+        toast.dismiss()
+        toast.loading('Adding Invoice')
+        const { error } = await supabase.from('billing').update({link: PDF.url}).eq('id', billing.id).select()
+        if(error) {
+            toast.dismiss()
+            toast.error(error.message)
+            return;
+        }
+        await fetch(`/dashboard/get/api/email/send-invoice?id=${wo.id}&bId=${billing.id}`)
+        await fetch(`/dashboard/admin/api/log`, {
+            method: 'POST',
+            body: JSON.stringify({
+                id: wo.id,
+                aId: admin.id,
+                type: 'Uploaded Invoice'
+            })
+        })
+        toast.dismiss()
+        toast.success('Invoice Added')
+        router.refresh()
+    }
+    // end send invoice
     return (
         <div className="w-full max-w-7xl py-8">
             <Toaster/>
@@ -439,6 +478,11 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
                         : '' 
                     }
                 {/* End Upload Tracking Number */}
+                {/* Start send invoice */}
+                    {
+                        wo.tracking_number ? (<button onClick={sendInvoiceAction}>Send Invoice</button>) : '' 
+                    }
+                {/* End send invoice */}
                 </div>
             </div>
             <div className="py-4">
