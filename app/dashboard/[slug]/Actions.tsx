@@ -480,7 +480,12 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
                 {/* End Upload Tracking Number */}
                 {/* Start send invoice */}
                     {
-                        wo.tracking_number ? (<button onClick={sendInvoiceAction}>Send Invoice</button>) : '' 
+                        wo.tracking_number ? (
+                            <button 
+                                className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover flex flex-row items-center"
+                                onClick={sendInvoiceAction}>Send Invoice
+                            </button>
+                        ) : '' 
                     }
                 {/* End send invoice */}
                 </div>
