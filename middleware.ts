@@ -29,12 +29,11 @@ export async function middleware(req: NextRequest) {
     const { error } = await supabase.from('admin').select().eq('user_id', users.user?.id).limit(1).single()
 
     if(error) {
-      return NextResponse.json({error: 'access not authorized'})
+      return NextResponse.redirect(process.env.NEXT_PUBLIC_URL)
     }
 
     let cookie = req.cookies.get('dist')
     if(!cookie) {
-      // get cookie
       console.log('getting cookie')
       const cred = await fetch(`${process.env.INFOR_API_pu}${process.env.INFOR_API_ot}`, {
         method: 'POST',
@@ -43,14 +42,11 @@ export async function middleware(req: NextRequest) {
         },
         body: `grant_type=password&client_id=${process.env.INFOR_API_ci}&client_secret=${process.env.INFOR_API_cs}&username=${process.env.INFOR_APR_USER}&password=${process.env.INFOR_API_PASS}`
       }).then(data => data.json())
-    
       
       res.headers.append('Set-Cookie', `dist=${cred.access_token}; Max-Age=${cred.expires_in}; HttpOnly=true;`)
 
       return res
     }
-    
-    console.log('has cookie')
     return res
   }
 

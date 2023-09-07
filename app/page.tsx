@@ -40,10 +40,10 @@ export default async function Index() {
         <div className="w-full max-w-xl space-y-4">
           <ol className="space-y-4">
             <li><strong>Work Order Submission</strong>: Submit a work order request online, from there we when send you a shipping with in 30 minutes.</li>
-            <li><strong>Shiping Out</strong>: Ship your parts free of charge using our shipping label.</li>
+            <li><strong>Shiping Out</strong>: We will provide you with a shipping label to have your parts sent to our shop.</li>
             <li><strong>Testing</strong>: Our skilled technicians will conduct a thorough assessment to determine the best course of action.</li>
             <li><strong>Repair/Reman</strong>: We apply state-of-the-art techniques and replace worn parts to restore your fuel injectors and pumps to optimal conditions.</li>
-            <li><strong>Delivered to Your Doorstep</strong>: Once complete, we promptly deliver your revitalized components, ready to breathe new life into your vehicle.</li>
+            <li><strong>Delivered to Your Doorstep</strong>: Once complete, we promptly deliver your revitalized components, ready to breathe new life back into your vehicle.</li>
           </ol>
         </div>
         <div className="basis-full text-center">
