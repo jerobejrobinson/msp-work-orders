@@ -8,6 +8,7 @@ import { Toaster, toast } from 'react-hot-toast'
 
 export default function Login() {
   const searchParams = useSearchParams().get('sign-up')
+  console.log(searchParams)
   const [view, setView] = useState(searchParams ? 'sign-up' : 'sign-in')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

@@ -12,7 +12,7 @@ export default async function Index() {
           <p>Welcome to MSP Diesel Solutions R&R Program, your one-stop shop for top-quality fuel injector and pump repair and re-manufacturing services. We understand the importance of a well-functioning engine, and our skilled technicians are dedicated to reviving your vehicle's performance with precision and care.</p>
           <div>
             <Link
-              href="/login"
+              href="/login?sign-up=true"
               className="bg-main text-white rounded p-4"
             >Create Account To Get Started</Link>
           </div>

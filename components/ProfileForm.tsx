@@ -39,7 +39,7 @@ export default function CustomerForm() {
 
         const { data, error } = await supabase
             .from('customer')
-            .insert([{...formState, user_id: user.id}])
+            .insert([{...formState, user_id: user.id, email: user.email}])
             .select()
 
 
@@ -48,7 +48,7 @@ export default function CustomerForm() {
         if(data) router.refresh()
     }
     return (
-        <div className="flex flex-col max-w-3xl w-full px-4">
+        <div className="flex flex-col max-w-3xl w-full px-4 mx-auto">
           <section className='pt-20'>
             <h1 className='text-xl font-bold'>Edit Profile Information</h1>
             <p>Please enter all information to submit a work order ticket.</p>

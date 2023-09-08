@@ -42,6 +42,8 @@ export async function GET(request: Request) {
         return NextResponse.json({status: 500, msg: "Could not retreive work order."})
     }
 
+    console.log(data)
+    
     const adminMsg = {
         from: {
             email: "jrobinson@mspdieselsolutions.com"
