@@ -54,6 +54,7 @@ export async function GET(request: Request) {
                     }
                 ],
                 dynamic_template_data: {
+                    "customerName": wo.customer.first_name,
                     "admin": `${admin.first_name}`,
                     "url": wo.return_shipping
                 }

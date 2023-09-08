@@ -438,7 +438,6 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
                 {/* End Add Note Action */}
                 {/* Start Add Note Action */}
                 {
-                wo.tracking_number ? "" :
                 !cancelBtn ? (
                     <BtnAction click={ handleCancelBtnClick} name="Cancel Work Order" />
                     ):(<BtnOptions click={ handleCancelBtnClick} submit={handleCancelAction} name="Cancel Work Order" />)}

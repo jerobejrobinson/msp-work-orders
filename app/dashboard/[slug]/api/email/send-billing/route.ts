@@ -38,7 +38,7 @@ export async function GET(request: Request) {
     // @ts-ignore
     const { data: wo, error: woError } = await supabase.from('work_order').select('id, number, type, customer ( email, first_name, last_name )').eq('id', id).limit(1).single<WorkOrder>()
     
-    const { data: billing, error: billingError } = await supabase.from('billing').select('note').eq('id', bId).limit(1).single<Billing>()
+    const { data: billing, error: billingError } = await supabase.from('billing').select('id, notes, link').eq('id', bId).limit(1).single<Billing>()
 
     const { data: admin, error: adminError } = await supabase.from('admin').select('first_name, last_name').eq('user_id', data.user?.id).limit(1).single<Admin>()
 
@@ -47,6 +47,7 @@ export async function GET(request: Request) {
         return NextResponse.json({status: 500, msg: "Could not retreive work order."})
     }
     if(billingError) {
+        console.log(billingError)
         return NextResponse.json({status: 500, msg: "Could not retreive billing"})
     }
     if(adminError) {
