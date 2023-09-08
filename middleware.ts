@@ -14,7 +14,7 @@ export async function middleware(req: NextRequest) {
   await supabase.auth.getSession()
 
   if (req.nextUrl.pathname.startsWith('/dashboard')) {
-    const { data} = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser()
     const { error } = await supabase.from('admin').select().eq('user_id', data.user?.id).limit(1).single()
 
     if(error) {
@@ -33,6 +33,7 @@ export async function middleware(req: NextRequest) {
     }
 
     let cookie = req.cookies.get('dist')
+
     if(!cookie) {
       console.log('getting cookie')
       const cred = await fetch(`${process.env.INFOR_API_pu}${process.env.INFOR_API_ot}`, {
@@ -47,6 +48,7 @@ export async function middleware(req: NextRequest) {
 
       return res
     }
+    
     return res
   }
 

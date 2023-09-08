@@ -5,6 +5,7 @@ import Link from 'next/link'
 import LogoutButton from '../components/LogoutButton'
 import Image from 'next/image'
 import { Roboto_Slab } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/react';
 
 export const metadata = {
   title: 'MSP Fuel Injection Systems Repair/Reman',
@@ -104,6 +105,7 @@ export default async function RootLayout({ children, }: {children: React.ReactNo
           </div>
       </nav>
       {children}
+      <Analytics />
       </body>
     </html>
   )

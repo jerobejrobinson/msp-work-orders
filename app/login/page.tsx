@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
+import { Toaster, toast } from 'react-hot-toast'
 
 export default function Login() {
   const searchParams = useSearchParams().get('sign-up')
@@ -27,16 +28,38 @@ export default function Login() {
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
-    router.push('/')
-    router.refresh()
+
+    if(error) {
+      toast.error(error.message)
+      return;
+    }
+
+    const { data, error: userError } = await supabase.auth.getUser()
+    const { data: aData, error: aError } = await supabase.from('admin').select().eq('user_id', data.user?.id).limit(1).single()
+
+    if(aError && data) {
+      router.push('/work-orders')
+      router.refresh()
+    }
+    
+    if(aData) {
+      router.push('/dashboard')
+      router.refresh()
+    }
+
+
+    
+    
+    // router.refresh()
   }
 
   return (
     <div className="h-main w-full bg-background flex flex-col items-center relative mt-16">
+      <Toaster/>
       <Image 
         src="/images/clear-logo.png"
         width={333}
