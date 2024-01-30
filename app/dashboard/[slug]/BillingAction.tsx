@@ -17,7 +17,7 @@ export default function BillingAction({billing}: { billing: any }) {
     return (
         <div className="p-4 relative">
             {!billing.approved && (
-                <button className="text-main" onClick={handleDeleteBilling}>Click to delete and upload new billing</button>
+                <button className="text-main" onClick={handleDeleteBilling}>Click to delete and upload a new quote</button>
             )}
             <p className="font-bold">Invoice Number</p>
             <p>{billing.invoice}</p>
@@ -25,8 +25,18 @@ export default function BillingAction({billing}: { billing: any }) {
             <p>${billing.amount}</p>
             <p className="font-bold">Link</p>
             <Link href={billing.link}>View PDF</Link>
-            <p className="font-bold">Note</p>
-            <p>{billing.notes}</p>
+            {billing.notes && (<>
+                <p className="font-bold">Note</p>
+                <p>{billing.notes}</p>
+            </>)}
+            {billing.approved_at && (
+                <>
+                    <p className="font-bold">Approval Status</p>
+                    <p>{billing.approved ? 'Approved' : 'Declined'}</p>
+                    <p className="font-bold">Decision Made At</p>
+                    <p>{new Date(billing.approved_at).toString()}</p>
+                </>
+            )}
         </div>
     )
 }

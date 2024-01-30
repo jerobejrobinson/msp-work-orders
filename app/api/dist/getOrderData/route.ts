@@ -39,5 +39,6 @@ export async function POST(request: Request) {
     if(data.response.tOrderhdrtrans['t-orderhdrtrans'].length == 0) {
         return NextResponse.json({status: 404, error: "Order number not found"})
     }
-    return NextResponse.json({status: 200, amount: data.response.tOrderhdrtrans['t-orderhdrtrans'][0].totordamt, error: null})
+
+    return NextResponse.json({status: 200, amount: data.response.tOrderhdrtrans['t-orderhdrtrans'][0].totordamt, raw_data: data.response})
 }

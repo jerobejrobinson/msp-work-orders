@@ -39,6 +39,12 @@ export default async function WorkOrder({ wo }: { wo: any}) {
                         <div className="font-bold">Shipping Label</div>
                         {wo.return_shipping && <Link href={wo.return_shipping} rel="noopener noreferrer" target="_blank">Download Label</Link>}
                     </div>
+                    {wo.tracking_number && (
+                        <div className="flex flex-col">
+                            <div className="font-bold">Tracking Number</div>
+                            {wo.tracking_number}
+                        </div>
+                    )}
                 </div>
             </div>
             {/* Part Issues  */}

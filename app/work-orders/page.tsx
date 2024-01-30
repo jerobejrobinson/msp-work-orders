@@ -18,7 +18,7 @@ export default async function WorkOrderPage() {
        notFound()
     }
 
-    const { data: workOrderData } = await supabase.from('work_order').select('id, number, type, tracking_number, product_number, return_shipping, created_at, last_update_at').eq('customer_id', customerData.id).order('last_update_at', { ascending: false })
+    const { data: workOrderData } = await supabase.from('work_order').select('id, number, type, tracking_number, product_number, return_shipping, created_at, last_update_at, status').eq('customer_id', customerData.id).order('last_update_at', { ascending: false })
 
     if(!workOrderData) {
         return (

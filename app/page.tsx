@@ -1,7 +1,21 @@
 import Link from "next/link"
 import Image from "next/image"
+import { cookies } from 'next/headers'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import { redirect } from 'next/navigation'
+
 export default async function Index() {
-  
+  const supabase = createServerComponentClient({ cookies })
+
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const { data: admin  } = await supabase.from('admin').select('user_id, first_name').eq('user_id', user?.id).limit(1).single()
+ if(user && admin) {
+    redirect('/dashboard')
+  }
+  if(user && !admin) {
+    redirect('/work-orders')
+  }
 
   return (
     <>

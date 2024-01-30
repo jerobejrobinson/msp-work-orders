@@ -55,7 +55,7 @@ export async function GET(request: Request) {
                     "customerName": `${wo.customer.first_name} ${wo.customer.last_name}`,
                     "approved": billing?.approved,
                     "number": wo.number,
-                    "invoice": "10021345-00",
+                    "invoice": billing?.invoice,
                     "woUrl": `${process.env.NEXT_PUBLIC_URL}/dashboard/${wo.id}`,
                     "iUrl": billing?.link
                 }

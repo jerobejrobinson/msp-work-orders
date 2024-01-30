@@ -17,7 +17,11 @@ interface WorkOrder {
     last_update_at: Date,
     return_shipping: string | null,
     completed_at: Date | null,
-    customer_id: number
+    customer_id: number,
+    length: number,
+    height: number,
+    width: number,
+    weight: number
 }
 
 export default function Form() {
@@ -31,6 +35,10 @@ export default function Form() {
         details: String | null,
         shipping: String | null,
         carrier: String | null,
+        length: Number | null,
+        height: Number | null,
+        width: Number | null,
+        weight: Number | null,
         type: 'reman' | 'test only' | 'repair' | 'test and r&r' | null
     }>({
         product_number: null,
@@ -39,7 +47,11 @@ export default function Form() {
         details: null,
         shipping: null,
         carrier: null,
-        type: null
+        type: null,
+        length: null,
+        height: null,
+        width: null,
+        weight: null
     })
 
     const handleInputState = (e: React.ChangeEvent<HTMLInputElement>, isNumber: Boolean = false) => {
@@ -85,7 +97,7 @@ export default function Form() {
  
         if(!customer) return redirect('/profile')
 
-        const { data: workOrderData, error } = await supabase.from('work_order').insert([{...formState, customer_id: customer.id}]).select().limit(1).single<WorkOrder>()
+        const { data: workOrderData, error } = await supabase.from('work_order').insert([{...formState, customer_id: customer.id, status: 'Work order submitted'}]).select().limit(1).single<WorkOrder>()
 
         if(error) return toast.error(error.message)
 
@@ -101,7 +113,7 @@ export default function Form() {
     return (
         <div className='w-full bg-background flex flex-col items-center py-8 mt-16'>
             <Toaster />
-            <h1 className="text-xl font-bold text-center p-4">Create New Work Order</h1>
+            <h1 className="text-xl font-bold text-center p-4">Submit New Work Order</h1>
             <form className="flex flex-col gap-4 bg-white p-4 rounded border w-full max-w-4xl shadow" onSubmit={handleWorkOrderSubmission}>
                 <div className="grid grid-cols-1 gap-2">
                     <label htmlFor="part-number" className="text-lg font-bold">Part Number: </label>
@@ -248,6 +260,45 @@ export default function Form() {
                         onChange={handleInputState}
                     />
                     <label  className="col-span-3 cursor-pointer" htmlFor="next-day">Expedited Next Day ($50 Upcharge)</label>
+                </div>
+                <div className='grid grid-cols-4 gap-2'>
+                    <p className="text-lg font-bold col-span-4">Enter Shipping Package Dimensions and Weight</p>
+                    <input 
+                        required 
+                        type="text" 
+                        id="length" 
+                        name="length" 
+                        placeholder="length (in)" 
+                        className="rounded-md px-4 py-2 bg-inherit border mb-6 bg-white"
+                        onChange={(e) => handleInputState(e, true)}
+                    />
+                    <input 
+                        required 
+                        type="text" 
+                        id="width" 
+                        name="width" 
+                        placeholder="width (in)" 
+                        className="rounded-md px-4 py-2 bg-inherit border mb-6 bg-white"
+                        onChange={(e) => handleInputState(e, true)}
+                    />
+                    <input 
+                        required 
+                        type="text" 
+                        id="height" 
+                        name="height" 
+                        placeholder="height (in)" 
+                        className="rounded-md px-4 py-2 bg-inherit border mb-6 bg-white"
+                        onChange={(e) => handleInputState(e, true)}
+                    />
+                    <input 
+                        required 
+                        type="text" 
+                        id="weight" 
+                        name="weight" 
+                        placeholder="weight (lbs)" 
+                        className="rounded-md px-4 py-2 bg-inherit border mb-6 bg-white"
+                        onChange={(e) => handleInputState(e, true)}
+                    />
                 </div>
                 <div className="grid grid-cols-4 gap-y-2">
                     <p className="text-lg font-bold col-span-4">Select Work Order Type</p>

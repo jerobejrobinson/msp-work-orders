@@ -15,7 +15,7 @@ export async function POST(request: Request) {
         return NextResponse.json({error: 'error getting token'})
     }
 
-    const data = await fetch(`https://mingle-ionapi.inforcloudsuite.com/D7NMH8MYY885DBPS_TRN/IDM/api/items/search/item/resource?%24query=%2FAcknowledgement%5B%40Order_Number%3D%22${orderNumber}%22%5D`, {
+    const data = await fetch(`https://mingle-ionapi.inforcloudsuite.com/D7NMH8MYY885DBPS_PRD/IDM/api/items/search/item/resource?%24query=%2FAcknowledgement%5B%40Order_Number%3D%22${orderNumber}%22%5D`, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',

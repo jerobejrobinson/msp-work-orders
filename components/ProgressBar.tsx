@@ -38,7 +38,7 @@ export default async function ProgressBar({wo, test_results, billing}: {wo: any,
 
     const workInProgress = () => {
         if(!billing) return ''
-        if(billing.approved) {
+        if(billing.approved && wo.tracking_number) {
             return 'bg-greenLight text-white'
         }else {
             return 'bg-greenLight text-white animate-pulse'
@@ -48,7 +48,7 @@ export default async function ProgressBar({wo, test_results, billing}: {wo: any,
     const shipped = () => {
         if(!billing) return ''
         if(billing.approved && !wo.tracking_number) {
-            return 'bg-greenLight text-white animate-pulse'
+            return ''
         }else if(billing.approved && wo.tracking_number) {
             return 'bg-greenLight text-white'
         } else {

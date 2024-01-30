@@ -78,7 +78,7 @@ export default function CustomerActions({wo, customer_id, billing, testing}: {wo
     }
 
     const [ billingClick, setBillingClick ] = useState<boolean>(false)
-    const [ approvalChoice, setApprovalChoice ] = useState<boolean>(false)
+    const [ approvalChoice, setApprovalChoice ] = useState<boolean | string>(false)
     const handleBillingClick = () => {
         setBillingClick(prev => !prev)
     }
@@ -88,7 +88,13 @@ export default function CustomerActions({wo, customer_id, billing, testing}: {wo
         }
 
         toast.loading('loading')
-        const { data, error } = await supabase.from('billing').update({approved: approvalChoice, approved_at: new Date().toISOString()}).eq('id', billing.id).select()
+        let status = null
+        if(approvalChoice) {
+            status = `Approved begin work order status`
+        } else {
+            status = `Rejected`
+        }
+        const { data, error } = await supabase.from('billing').update({approved: approvalChoice, approved_at: new Date().toISOString(), status: status}).eq('id', billing.id).select()
         if(error) {
             toast.dismiss() 
             toast.error(error.message)
@@ -141,7 +147,7 @@ export default function CustomerActions({wo, customer_id, billing, testing}: {wo
                     !billingClick ? (
                         <BtnAction click={handleBillingClick} name="Approve Billing" />
                     ): (
-                        <BtnOptions click={handleBillingClick} submit={submitApproval} name="Billing"/>
+                        <BtnOptions click={handleBillingClick} submit={submitApproval} name="Changes"/>
                     )
                 }
                 </div>
@@ -190,8 +196,8 @@ export default function CustomerActions({wo, customer_id, billing, testing}: {wo
             )}
             {billingClick && (
                 <div className="w-full p-4 bg-white rounded mt-4 space-y-4 border shadow">
-                    <Link href={billing.link} rel="noopener noreferrer" target="_blank" className="font-bold" >Click To View Bill</Link>
-                    <p>Amount: {billing.amount}</p>
+                    <Link href={billing.link} rel="noopener noreferrer" target="_blank" className="font-bold" >Click To View Quote</Link>
+                    <p>Amount: ${billing.amount}</p>
                     <div>
                         <label htmlFor="billingTrue">Approve: </label>
                         <input 
@@ -201,7 +207,8 @@ export default function CustomerActions({wo, customer_id, billing, testing}: {wo
                             value="true" 
                             className="w-4 h-4 mr-4" 
                             onChange={(e) => {
-                                setApprovalChoice(e.target.value === 'true')
+                                console.log(e.target.value)
+                                setApprovalChoice('true')
                             }}
                         />
                         <label htmlFor="billingFalse">Decline: </label>
@@ -212,7 +219,8 @@ export default function CustomerActions({wo, customer_id, billing, testing}: {wo
                             value="false"
                             className="w-4 h-4"  
                             onChange={(e) => {
-                                setApprovalChoice(e.target.value === 'true')
+                                console.log(e.target.value)
+                                setApprovalChoice('false')
                             }}
                         />
                     </div>

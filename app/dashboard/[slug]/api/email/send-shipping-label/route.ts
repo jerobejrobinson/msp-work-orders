@@ -20,6 +20,7 @@ interface Admin {
     last_name: string
 }
 export async function GET(request: Request) {
+    console.log('start getting rates')
     sgMail.setApiKey(process.env.NEXT_PUBLIC_SENDGRID_API_KEY)
     const supabase = createRouteHandlerClient({ cookies })
     const { searchParams } = new URL(request.url)
@@ -56,7 +57,8 @@ export async function GET(request: Request) {
                 dynamic_template_data: {
                     "customerName": wo.customer.first_name,
                     "admin": `${admin.first_name}`,
-                    "url": wo.return_shipping
+                    "url": wo.return_shipping,
+                    "psUrl": `${process.env.NEXT_PUBLIC_URL}/assets/mspShippingDoc.pdf`
                 }
             }
         ],

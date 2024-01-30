@@ -9,32 +9,21 @@ import { stringify } from "querystring"
 export default function AdminActions({wo, admin, testRes, billing, notes, images}: {wo: any, admin: any, testRes: any, billing: any, notes: any, images: any}) {
     const supabase = createClientComponentClient()
     const router = useRouter()
-
-    // Start Shipping Label
-    const [shippingLabelClick, setShippingLabelClick] = useState<boolean>(false)
-    const [shippingFile, setShippingFile] = useState<File | null>(null)
-    const handleShippingLabelClick = () => {
-        setShippingLabelClick(prev => !prev)
-    }
-    const submitShippingLabel = async () => {
-        if(!shippingFile) return toast.error("Need to upload a file before proceeding")
-
-        toast.loading('Uploading document.....')
-        // Shipping file naming convention account-number_sl_date
-        const { error } = await supabase.storage.from('public').upload(`shipping-labels/${shippingFile.name}`, shippingFile, {
-            cacheControl: '3600',
-            upsert: false
-        })
-
-        if(error) {
-            toast.dismiss(); 
-            toast.error(error.message)
-            return;
+    // Start Getting Shipping Rates
+    const [shippingRatesClick, setShippingRatesClick] = useState<boolean>(false)
+    const [rates, setRates] = useState<any>(null)
+    const [label, setLabel] = useState<any>(null)
+    const handleGetShippingRatesClick = async () => {
+        setShippingRatesClick(prev => !prev)
+        if(!shippingRatesClick) {
+            const res = await fetch(`/dashboard/get/api/shipping-rates?id=${wo.id}`).then(res => res.json())
+            console.log(res.rates.rates)
+            setRates(res.rates.rates)
         }
-        
-        const { data } = await supabase.storage.from('public').getPublicUrl(`shipping-labels/${shippingFile.name}`)
-
-        const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString(), return_shipping: data.publicUrl}).eq('id', wo.id)
+    }
+    const submitShippingLabelRates = async () => {
+        if(!label) return toast.error('Must select a rate before continuing')
+        const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString(), return_shipping: label.label.label_url, return_tracking_number: label.label.tracking_number, return_tracking_rate: label.amount, status: 'Shipping label submitted'}).eq('id', wo.id)
 
         if(errorUpdate) {
             toast.dismiss()
@@ -52,9 +41,55 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
             })
         })
         toast.success("Shipping label uploaded.")
-        handleShippingLabelClick()
+        setShippingRatesClick(prev => !prev)
         router.refresh()
     }
+    // End Getting Shipping Rates
+    // Start Shipping Label
+    // const [shippingLabelClick, setShippingLabelClick] = useState<boolean>(false)
+    // const [shippingFile, setShippingFile] = useState<File | null>(null)
+    // const handleShippingLabelClick = () => {
+    //     setShippingLabelClick(prev => !prev)
+    // }
+    // const submitShippingLabel = async () => {
+    //     if(!shippingFile) return toast.error("Need to upload a file before proceeding")
+
+    //     toast.loading('Uploading document.....')
+    //     // Shipping file naming convention account-number_sl_date
+    //     const { error } = await supabase.storage.from('public').upload(`shipping-labels/${shippingFile.name}`, shippingFile, {
+    //         cacheControl: '3600',
+    //         upsert: false
+    //     })
+
+    //     if(error) {
+    //         toast.dismiss(); 
+    //         toast.error(error.message)
+    //         return;
+    //     }
+        
+    //     const { data } = await supabase.storage.from('public').getPublicUrl(`shipping-labels/${shippingFile.name}`)
+
+    //     const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString(), return_shipping: data.publicUrl}).eq('id', wo.id)
+
+    //     if(errorUpdate) {
+    //         toast.dismiss()
+    //         toast.error(errorUpdate.message)
+    //         return;
+    //     }
+
+    //     toast.dismiss()
+    //     await fetch(`/dashboard/get/api/email/send-shipping-label?id=${wo.id}`)
+    //     await fetch(`/dashboard/admin/api/log`, {
+    //         method: 'POST',
+    //         body: JSON.stringify({
+    //             id: wo.id,
+    //             type: 'Uploaded the shipping label to work order.'
+    //         })
+    //     })
+    //     toast.success("Shipping label uploaded.")
+    //     handleShippingLabelClick()
+    //     router.refresh()
+    // }
     // End Shipping Label
     // Start Notes 
     const [noteClicked, setNoteClicked ] = useState<boolean>(false)
@@ -93,7 +128,7 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
     }
     const updateWorkOrderNumber = async () => {
         if(!number) return toast.error('Must provide a value for work order numbers')
-        const { error } = await supabase.from('work_order').update({number: number, last_update_at: new Date().toISOString()}).eq('id', wo.id)
+        const { error } = await supabase.from('work_order').update({number: number, last_update_at: new Date().toISOString(), status: 'recieved'}).eq('id', wo.id)
         if(error) {
             toast.dismiss()
             toast.error(error.message)
@@ -124,7 +159,7 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
         if(!test) return toast.error("Need to upload a file before proceeding")
         const { error } = await supabase.storage.from('public').upload(`${wo.number}/test-results/${test.name}`, test, {
             cacheControl: '3600',
-            upsert: false
+            upsert: true
         })
 
         if(error) { toast.dismiss(); toast.error(error.message); return; }
@@ -135,7 +170,7 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
 
         if(errorUpload) return console.error(errorUpload.message)
 
-        const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString()}).eq('id', wo.id)
+        const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString(), status: 'Tested'}).eq('id', wo.id)
 
         if(errorUpdate) return console.error(errorUpdate.message)
 
@@ -202,7 +237,7 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
                 return
             }
 
-            const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString()}).eq('id', wo.id)
+            const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString(), status: 'Billing sent - waiting to be shipped'}).eq('id', wo.id)
 
             if(errorUpdate) {
                 toast.dismiss()
@@ -231,7 +266,7 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
                 return
             }
 
-            const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString()}).eq('id', wo.id)
+            const { error: errorUpdate } = await supabase.from('work_order').update({last_update_at: new Date().toISOString(), status: 'Billing sent - waiting for approval'}).eq('id', wo.id)
 
             if(errorUpdate) {
                 toast.dismiss()
@@ -360,7 +395,7 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
     const trackingNumberAction = async () => {
         toast.loading('Submiting Tracking Number...')
         if(!trackingNumberInput) return toast.error('Must provide a value before submitting tracking number')
-        const { error } = await supabase.from('work_order').update({last_update_at: new Date().toISOString(), tracking_number: trackingNumberInput }).eq('id', wo.id)
+        const { error } = await supabase.from('work_order').update({last_update_at: new Date().toISOString(), tracking_number: trackingNumberInput, status: 'shipped' }).eq('id', wo.id)
         if(error) {
             toast.dismiss()
             toast.error(error.message)
@@ -442,10 +477,13 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
                     <BtnAction click={ handleCancelBtnClick} name="Cancel Work Order" />
                     ):(<BtnOptions click={ handleCancelBtnClick} submit={handleCancelAction} name="Cancel Work Order" />)}
                 {/* End Add Note Action */}
+                {wo.return_shipping ? '' : !shippingRatesClick ? (
+                    <BtnAction click={handleGetShippingRatesClick} name="Get Shipping Rates" />
+                ):(<BtnOptions click={handleGetShippingRatesClick} submit={submitShippingLabelRates} name="Shipping Label" />)}
                 {/* Start Return Shipping Action */}
-                {wo.return_shipping ? '' : !shippingLabelClick ? (
+                {/* {wo.return_shipping ? '' : !shippingLabelClick ? (
                     <BtnAction click={handleShippingLabelClick} name="Add Shipping Label" />
-                ):(<BtnOptions click={handleShippingLabelClick} submit={submitShippingLabel} name="Shipping Label" />)}
+                ):(<BtnOptions click={handleShippingLabelClick} submit={submitShippingLabel} name="Shipping Label" />)} */}
                 {/* End Return Shipping Action */}
                 {/* Start Add Images  */}
                 {wo.number === "pending" ? '' : !imagesBtn ? (
@@ -464,7 +502,9 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
                     : (<BtnOptions click={handleTestClick} submit={handleTestResultSubmission} name="Test Results" />)}
                 {/* End Upload Test Reseults */}
                 {/* Start Upload Billing */}
-                    {!testRes?.length ? '' :
+
+                    {wo.type === 'test and r&r'  ? '' :
+                    !testRes?.length ? '' :
                     testRes?.length && !billing && !billingClick ? 
                     ( <BtnAction click={handleBillingClick} name="Add Billing" /> )
                     : !billing ? (<BtnOptions click={handleBillingClick} submit={submitBillingInformation} name="Billing" />) : ''}
@@ -512,15 +552,36 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
                     ></textarea>
                 </div>
             )}
-            {shippingLabelClick && (
+            {shippingRatesClick && (
+                <div className="w-full p-4 border rounded bg-white shadow grid grid-cols-3 gap-2">
+                    <p className="col-span-full font-bold">{!label ? 'Click To Select Rate' : 'Shipping Label And Tracking Number'}</p>
+                    {!rates ? 'loading rates' : !label ? rates.map((rate: any, index: number) => (
+                        <button key={index} className="border p-5 shadow hover:scale-105 hover:border-[#E8523D] bg-white transition-all" onClick={async () => {
+                            const res = await fetch(`/dashboard/get/api/shipping-label-create?id=${rate.object_id}`).then(res => res.json())
+                            setLabel({...res, amount: rate.amount})
+                        }}>
+                            <img src={rate.provider_image_75} alt={rate.provider + " image"} />
+                            <p className=" text-right">Amount: <span className="font-bold">${rate.amount}</span></p>
+                            <p className=" text-right">Service Level: <span>{rate.servicelevel.name}</span></p>
+                        </button>
+                    )) : (
+                        <>
+                            <a href={label.label.label_url} target="_blank">Label URL</a>
+                            <p>tracking number: {label.label.tracking_number}</p>
+                        </>
+                    )}
+                    {rates && rates.length === 0 && (<p>Rates could not be loaded.</p>)}
+                </div>
+            )}
+            {/* {shippingLabelClick && (
                 <div className="w-full p-4 border rounded bg-white shadow">
                     <p>Upload PDF File</p>
-                    <input type="file" name="shippingFile" id="shippingFile" onChange={(e) => {
+                    <input type="file" name="shippingFile" id="shippingFile" accept=".pdf" onChange={(e) => {
                         if(e.target.files !== null)
                         setShippingFile(e.target.files[0])
                     }}/>
                 </div>
-            )}
+            )} */}
             {numberClicked && (
                 <div className="w-full p-4 border rounded bg-white shadow">
                     <p>Add Work Order Number</p>
@@ -536,7 +597,7 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
             {testClicked && (
                 <div className="w-full p-4 border rounded bg-white shadow">
                     <p>Upload PDF File</p>
-                    <input type="file" name="testFile" id="testFile" onChange={(e) => {
+                    <input type="file" name="testFile" id="testFile" accept=".pdf" onChange={(e) => {
                         if(e.target.files !== null)
                         setTest(e.target.files[0])
                     }}/>
@@ -573,7 +634,7 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
             {imagesBtn && (
                 <div className="w-full p-4 border rounded bg-white shadow">
                     <p>Upload Images File</p>
-                    <input type="file" name="imageFile" id="imageFile" onChange={(e) => {
+                    <input type="file" name="imageFile" id="imageFile" accept=".jpeg, .png, .jpg, .webp" onChange={(e) => {
                         if(e.target.files !== null)
                         setImagesFiles(e.target.files)
                     }} multiple/>

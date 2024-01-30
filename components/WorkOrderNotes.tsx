@@ -2,7 +2,7 @@ export default async function WorkOrderNotes({ notes }: { notes: any }) {
     
     return (
         <div className="w-full max-w-7xl py-8">
-            <p className="text-xl font-bold flex flex-row justify-between">Notes</p>
+            <p className="text-xl font-bold flex flex-row justify-between">Notes & Comments</p>
             <div className="bg-white border rounded">
                 {notes && notes.length > 0 && notes.map((note: any, index: number) => {
                     if(note.admin) {
@@ -26,7 +26,7 @@ export default async function WorkOrderNotes({ notes }: { notes: any }) {
                 })}
                 {!notes?.length  && (
                     <div className=" italic font-light text-3xl p-4 flex flex-row pl-8 items-center">
-                        No Notes Are Available
+                        No Notes/Comments
                     </div>
                 )}
             </div>

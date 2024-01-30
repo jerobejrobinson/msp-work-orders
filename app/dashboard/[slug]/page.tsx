@@ -9,6 +9,7 @@ import WorkOrderNotes from "@/components/WorkOrderNotes"
 import TestResults from "@/components/TestResults"
 import Images from "@/components/Images"
 
+
 interface TestResult {
     id: string,
     created_at: Date,
@@ -77,11 +78,10 @@ export default async function Order({params}: { params: { slug: string }}) {
     const { data: customer, error: customerError } = await supabase.from('customer').select('*').eq('id', wo.customer_id).limit(1).single()
               
     return (
-        <div className="h-main w-full bg-background flex flex-col items-center relative mt-16">
+        <div className="w-full bg-background flex flex-col items-center relative mt-16">
             <AdminActions wo={wo} testRes={test_results} billing={billing} admin={admin} notes={notes}  images={images}/>
             <ProgressBar wo={wo} test_results={test_results} billing={billing} />
             <WorkOrder wo={wo} />
-            
             <div className="w-full max-w-7xl py-8">
                 <p className="text-xl font-bold">Customer Information</p>
                 <div className="grid grid-cols-4 gap-4 p-8 bg-white border rounded">

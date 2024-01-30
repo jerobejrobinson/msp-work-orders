@@ -73,7 +73,7 @@ export default async function Order({params}: { params: { slug: string }}) {
     const { data: images, error: imagesError } = await supabase.from('image').select('*').eq('wo_id', wo.id).returns<[Image]>()
 
     return (
-        <div className="h-main w-full bg-background flex flex-col items-center relative mt-16">
+        <div className="w-full bg-background flex flex-col items-center relative mt-16">
             <CustomerActions wo={wo} customer_id={customerData.id} billing={billing} testing={test_results}/>
             
             <ProgressBar wo={wo} billing={billing} test_results={test_results}/>
@@ -100,8 +100,18 @@ export default async function Order({params}: { params: { slug: string }}) {
                             <p>${billing.amount}</p>
                             <p className="font-bold">Link</p>
                             <Link href={billing.link}>View PDF</Link>
-                            <p className="font-bold">Note</p>
-                            <p>{billing.notes}</p>
+                            {billing.notes && (<>
+                                <p className="font-bold">Note</p>
+                                <p>{billing.notes}</p>
+                            </>)}
+                            {billing.approved_at && (
+                                <>
+                                    <p className="font-bold">Approval Status</p>
+                                    <p>{billing.approved ? 'Approved' : 'Declined'}</p>
+                                    <p className="font-bold">Decision Made At</p>
+                                    <p>{new Date(billing.approved_at).toString()}</p>
+                                </>
+                            )}
                         </div>
                     )}
                 </div>
