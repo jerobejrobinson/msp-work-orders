@@ -1,5 +1,5 @@
 
-const shippo = require('shippo')('shippo_live_668093dd741b1a11190811f6492b0dba0ecb38b5')
+const shippo = require('shippo')(process.env.SHIPPO_API_KEY)
 import { NextResponse } from "next/server"
 
 export async function GET(request: Request) {

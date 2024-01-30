@@ -1,5 +1,4 @@
-const shippo = require('shippo')('shippo_live_668093dd741b1a11190811f6492b0dba0ecb38b5')
-// const shippo = require('shippo')('shippo_test_9be23c9f6bd8d9e43ec7a3a729189d0bfd89afea')
+const shippo = require('shippo')(process.env.SHIPPO_API_KEY)
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
