@@ -8,7 +8,9 @@ import WorkOrder from "@/components/WorkOrderComponent"
 import WorkOrderNotes from "@/components/WorkOrderNotes"
 import TestResults from "@/components/TestResults"
 import Images from "@/components/Images"
-
+import {renderToFile} from '@react-pdf/renderer'
+import WorkOrderDownloadLink from '@/components/WorkOrderDownloadLink'
+import WorkOrderForm from "@/components/WorkOrderForm"
 
 interface TestResult {
     id: string,
@@ -76,7 +78,7 @@ export default async function Order({params}: { params: { slug: string }}) {
     const { data: images, error: imagesError } = await supabase.from('image').select('*').eq('wo_id', wo.id).returns<[Image]>()
 
     const { data: customer, error: customerError } = await supabase.from('customer').select('*').eq('id', wo.customer_id).limit(1).single()
-              
+
     return (
         <div className="w-full bg-background flex flex-col items-center relative mt-16">
             <AdminActions wo={wo} testRes={test_results} billing={billing} admin={admin} notes={notes}  images={images}/>

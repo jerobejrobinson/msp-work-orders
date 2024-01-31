@@ -5,7 +5,9 @@ import { useState } from 'react'
 import { useRouter } from "next/navigation"
 import { Toaster, toast } from 'react-hot-toast'
 import { stringify } from "querystring"
-
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import WorkOrderForm from "@/components/WorkOrderForm"
+import WorkOrderDownloadLink from "@/components/WorkOrderDownloadLink"
 export default function AdminActions({wo, admin, testRes, billing, notes, images}: {wo: any, admin: any, testRes: any, billing: any, notes: any, images: any}) {
     const supabase = createClientComponentClient()
     const router = useRouter()
@@ -126,8 +128,28 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
     const handleNumberClick = () => {
         setNumberClicked(prev => !prev)
     }
+
+    const generateWorkOrderPDF = async () => {
+        async function getLastWorkOrderNumber() {
+            const {data, count} =  await supabase.from('work_order').select('*', { count: 'exact', head: true })
+            return count
+        }
+
+        async function calculateNewWorkOrderNumber() {
+            const baseNumber = 70000
+            const res = await getLastWorkOrderNumber()
+            if(!res) return toast.error('Could not work order count.')
+            return baseNumber + res
+        }
+
+        const res = await calculateNewWorkOrderNumber()
+        if(!res) return toast.error('Could not calculate last work order')
+
+        setNumber(res.toString())
+    }
+
     const updateWorkOrderNumber = async () => {
-        if(!number) return toast.error('Must provide a value for work order numbers')
+        if(!number) return toast.error('Must generate work order PDF before continuing.')
         const { error } = await supabase.from('work_order').update({number: number, last_update_at: new Date().toISOString(), status: 'recieved'}).eq('id', wo.id)
         if(error) {
             toast.dismiss()
@@ -147,7 +169,7 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
         handleNumberClick()
         router.refresh()
     }
-    // End Order Order Number
+    // End Work Order Number
     // Start Work Order Tests
     const [testClicked, setTestClicked ] = useState<boolean>(false)
     const [test, setTest] = useState<any | null>(null)
@@ -466,6 +488,11 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
                     back
                 </Link>
                 <div className="flex flex-row gap-4">
+                {/* Start work order icon */}
+                {wo.number != 'pending' && (
+                    <WorkOrderDownloadLink wo={wo} />
+                )}
+                {/* End work order icon */}
                 {/* Start Add Note Action */}
                 {!noteClicked ? (
                     <BtnAction click={handleNoteClick} name="Add Note" />
@@ -584,10 +611,16 @@ export default function AdminActions({wo, admin, testRes, billing, notes, images
             )} */}
             {numberClicked && (
                 <div className="w-full p-4 border rounded bg-white shadow">
+                    <button onClick={() => generateWorkOrderPDF()} className="bg-gray-300 p-2 rounded font-sans font-bold">Generate Work Order Number</button>
+                    {number && (<p>{number}</p>)}
+                </div>
+            )}
+            {/* {numberClicked && (
+                <div className="w-full p-4 border rounded bg-white shadow">
                     <p>Add Work Order Number</p>
                     <input type="text" name="number" id="number" onChange={(e) => setNumber(e.target.value)} className="rounded-md px-4 py-2 bg-inherit border mb-6 bg-white w-full"/>
                 </div>
-            )}
+            )} */}
             {trackingNumberClick && (
                 <div className="w-full p-4 border rounded bg-white shadow">
                     <p>Add tracking Number</p>

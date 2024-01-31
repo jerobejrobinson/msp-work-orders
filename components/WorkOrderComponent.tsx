@@ -1,11 +1,12 @@
 import Link from "next/link"
+import WorkOrderDownloadLink from "./WorkOrderDownloadLink"
 
 export default async function WorkOrder({ wo }: { wo: any}) {
     return (
         <>
             {/* Work Order Details  */}
             <div className="w-full max-w-7xl py-8">
-                <p className="text-xl font-bold flex flex-row justify-between">Details <span className="font-light text-md"> Last Updated - {new Date(wo.last_update_at).toString()}</span></p>
+                <p className="text-xl font-bold flex flex-row justify-between">Details<span className="font-light text-md"> Last Updated - {new Date(wo.last_update_at).toString()}</span></p>
                 <div className="grid grid-cols-4 gap-4 p-8 bg-white border rounded">
                     <div className="flex flex-col">
                         <p className="font-bold">Work Order Number</p>
