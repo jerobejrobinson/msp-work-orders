@@ -3,6 +3,7 @@ const nextConfig = {
   experimental: {
     appDir: true,
     serverComponentsExternalPackages: ['@react-pdf/renderer'],
+    serverActions: true
   },
   images: {
     remotePatterns: [

@@ -3,22 +3,46 @@ import Image from "next/image"
 import { cookies } from 'next/headers'
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { redirect } from 'next/navigation'
-
+import LogoutButton from "@/components/LogoutButton"
 export default async function Index() {
   const supabase = createServerComponentClient({ cookies })
 
   const { data: { user } } = await supabase.auth.getUser()
 
   const { data: admin  } = await supabase.from('admin').select('user_id, first_name').eq('user_id', user?.id).limit(1).single()
- if(user && admin) {
-    redirect('/dashboard')
-  }
-  if(user && !admin) {
-    redirect('/work-orders')
-  }
+
+  // if(user && admin) {
+  //   redirect('/dashboard')
+  // }
+  // if(user && !admin) {
+  //   redirect('/work-orders')
+  // }
 
   return (
     <>
+      <nav className="w-full flex border-b border-b-foreground/10 h-16 justify-center fixed z-50 top-0 bg-white">
+        <div className="w-full max-w-7xl flex justify-between items-center p-3 text-sm text-foreground">
+          <Link href="/">
+            <Image src="/images/clear-logo.png" width={200} height={100} alt="MSP Diesel Solution Logo" />
+          </Link>
+          {!user && (<Link href="/login" className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover self-end" >Login</Link>)}
+          <div className="flex flex-row items-center gap-4">
+            {user && admin && (
+              <>
+                <Link href="/dashboard" className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover flex flex-row items-center">Dashboard</Link>
+                <LogoutButton />
+              </>
+            )}
+            {!admin && user && (
+              <>
+                <Link href="/work-orders" className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover flex flex-row items-center">Work Orders</Link>
+                <Link href="/profile" className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover flex flex-row items-center">Profile</Link>
+                <LogoutButton />
+              </>
+            )}
+          </div>
+        </div>
+      </nav>
       <div className=" h-main mt-16 flex flex-row items-center justify-center space-x-16">
         {/* max width 495 */}
         <div className="w-full max-w-xl space-y-8">
