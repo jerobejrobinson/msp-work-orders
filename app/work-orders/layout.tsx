@@ -12,7 +12,7 @@ export default async function DashboardLayout({ children, }: {children: React.Re
                     </Link>
                     <div className='flex flex-row items-center gap-4'>
                     <Link href="/work-orders" className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover flex flex-row items-center">Work Orders</Link>
-                    {/* <Link href="/profile" className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover flex flex-row items-center">Profile</Link> */}
+                    <Link href="/profile" className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover flex flex-row items-center">Profile</Link>
                     <LogoutButton />
                     </div>
                 </div>

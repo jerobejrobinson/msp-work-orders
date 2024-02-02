@@ -14,7 +14,7 @@ export default async function Page() {
     }
 
     return (
-        <main className="flex flex-col justify-center">
+        <main className="flex flex-col justify-center h-screen bg-gray-200">
             <Form />
         </main>
     )

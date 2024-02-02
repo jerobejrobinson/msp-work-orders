@@ -1,20 +1,53 @@
 'use server'
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { UUID } from "crypto"
 import { cookies } from "next/headers"
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
 
 interface Technician {
     id: number
+    number: number
+    name: string
 }
 interface WorkOrder {
     id: string
+    number: string
 }
-export async function submitForm(formData: FormData) {
+
+interface CheckTask {
+    id: number
+    started_at: any
+    task_type: string
+    is_completed: boolean
+    work_order: WorkOrder
+    technician: Technician
+}
+
+interface FormSubmit {
+    error: string | null
+    status: string | null
+}
+
+function supabaseErrorCodes(error: any, stem: string) {
+    switch(error.code) {
+        case 'PGRST116':
+            return `No entry in database. Entry point: ${stem}`
+        case 'PGRST204':
+            return `COLUMN not found in TABLE. Entry point: ${stem}`
+        case '23502':
+            return `Data passed violates not-null constraint. Entry point: ${stem}`
+        case '22P02':
+            return `Invalid input type for UUID. Entry point: ${stem}`
+        case '21000':
+            return `UPDATE requires a where clause. Entry point: ${stem}`
+        default:
+            return `Error code unknown: ${error.code}, see developer for debugging. Entry point: ${stem}`
+    }
+}
+
+export async function submitForm(formData: FormData): Promise<FormSubmit | undefined> {
     const supabase = await createServerComponentClient({cookies})
-    // const { error, data: { user } } = await supabase.auth.getUser()
-    // const { data: admin  } = await supabase.from('admin').select('user_id, first_name').eq('user_id', user?.id).limit(1).single()
-    
-    // if(error) return error;
+    dayjs.extend(relativeTime)
 
     const rawFormData = {
         badge: formData.get('badge'),
@@ -22,27 +55,49 @@ export async function submitForm(formData: FormData) {
         task: formData.get('task'),
     }
 
-    const { error: technicianError, data: technician } = await supabase.from('technician').select('id').eq('number', Number(rawFormData.badge)).single<Technician>()
-    
-    switch(technicianError?.code) {
-        case 'PGRST116':
-            console.log('Technician not found')
-            break;
-            
-            default:
-            return {error: `Unknown error code. Send error code ${technicianError?.code} to developer for debugging.`}
+    // Get Technician Badge ID
+    const { error: technicianError, data: technician } = await supabase.from('technician').select('id, number, name').eq('number', Number(rawFormData.badge)).single<Technician>()
+    if(technicianError) {
+        return {error: supabaseErrorCodes(technicianError, 'Technician Error'), status: null}
     }
 
-    const { error: taskError, data: workOrder } = await supabase.from('work_order').select('id').eq('number', rawFormData.number).single<WorkOrder>()
-    switch(taskError?.code) {
-        case 'PGRST116':
-            console.log('Work Order not found')
-            break;
-            
-            default:
-            return {error: `Unknown error code. Send error code ${taskError?.code} to developer for debugging.`}
+    // Get Work Order ID
+    const { error: workOrderError, data: workOrder } = await supabase.from('work_order').select('id, number').eq('number', rawFormData.number).single<WorkOrder>()
+    if(workOrderError) {
+        return {error: supabaseErrorCodes(workOrderError, 'Work Order Error'), status: null}
     }
-        
-    const { error: insertError } = await supabase.from('work_order_task').insert({technician_id: technician?.id, work_order_id: workOrder?.id, task_type: rawFormData.task})
-    // console.log(rawFormData)
+
+    // Try to get task from given inputs
+    const { error: checkTaskError, data } = await supabase.from('work_order_task').select('id, started_at, task_type, is_completed, work_order ( id, number ), technician ( id, name )').eq('work_order_id', workOrder?.id).eq('is_completed', false).single<CheckTask>()
+
+    if(checkTaskError) {
+        if(checkTaskError.code = 'PGRST116') {
+            const { error: insertTaskError } = await supabase.from('work_order_task').insert({task_type: rawFormData.task, technician_id: technician?.id, work_order_id: workOrder?.id})
+            if(insertTaskError) {
+                return {error: supabaseErrorCodes(insertTaskError, 'Insert Task Error'), status: null}
+            }
+            return {error: null, status: 'Task started'}
+        } else {
+            return {error: supabaseErrorCodes(checkTaskError, 'Check Task Error'), status: null}
+        }
+    }
+
+    if(data) {
+        if(data.technician?.id == technician?.id) {
+            if(data.task_type != rawFormData.task) {
+                return {error: `Must select task: ${data.task_type}, to complete`, status: null}
+            }
+            // Update task to completed and return
+            const ended_at = ((new Date()).toISOString()).toLocaleString()
+            const totalTime = dayjs(data.started_at).from(ended_at, true)
+            const { error: updateTaskError } = await supabase.from('work_order_task').update({is_completed: true, ended_at: ended_at, total_time: totalTime}).eq('id', data.id)
+
+            if(updateTaskError) {
+                return {error: supabaseErrorCodes(updateTaskError, 'Update Task Error'), status: null}
+            }
+            return {error: null, status: 'Task has been set to completed'};
+        } else {
+            return {error: 'The scanned ticket can not be checked out because it is currently being worked on.', status: null};
+        }
+    } 
 }
