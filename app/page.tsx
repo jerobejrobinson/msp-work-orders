@@ -2,7 +2,6 @@ import Link from "next/link"
 import Image from "next/image"
 import { cookies } from 'next/headers'
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { redirect } from 'next/navigation'
 import LogoutButton from "@/components/LogoutButton"
 export default async function Index() {
   const supabase = createServerComponentClient({ cookies })
@@ -10,13 +9,6 @@ export default async function Index() {
   const { data: { user } } = await supabase.auth.getUser()
 
   const { data: admin  } = await supabase.from('admin').select('user_id, first_name').eq('user_id', user?.id).limit(1).single()
-
-  // if(user && admin) {
-  //   redirect('/dashboard')
-  // }
-  // if(user && !admin) {
-  //   redirect('/work-orders')
-  // }≥
 
   return (
     <>
@@ -49,21 +41,22 @@ export default async function Index() {
         {/* max width 495 */}
         <div className="w-full max-w-xl space-y-8">
           <h1 className="text-4xl font-bold">Expert Fuel Injector and Pump Repair/Reman Services!</h1>
-          <p>Welcome to MSP Diesel Solutions R&R Program, your one-stop shop for top-quality fuel injector and pump repair and re-manufacturing services. We understand the importance of a well-functioning engine, and our skilled technicians are dedicated to reviving your vehicle's performance with precision and care.</p>
+          <p className="font-sans">Welcome to MSP Diesel Solutions R&R Program, your one-stop shop for top-quality fuel injector and pump repair and re-manufacturing services. We understand the importance of a well-functioning engine, and our skilled technicians are dedicated to reviving your vehicle's performance with precision and care.</p>
           <div>
             <Link
               href="/login?sign-up=true"
               className="bg-main text-white rounded p-4"
             >Create Account To Get Started</Link>
           </div>
-          <p className="text-sm"><em>We offer 3 turn-around on testing and work service. Sign up for a account to get started!</em></p>
+          <p className="text-sm font-sans p-1"><em>We offer 3 turn-around on testing and work service. Sign up for a account to get started!</em></p>
         </div>
         <div className="mx-auto">
           <Image
             src="/images/msp_office.jpg"
             alt="MSP Diesel Solutions Main Building"
-            width={495}
+            width={512}
             height={512}
+            className="mx-auto"
           />
         </div>
       </div>
