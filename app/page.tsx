@@ -16,7 +16,7 @@ export default async function Index() {
   // }
   // if(user && !admin) {
   //   redirect('/work-orders')
-  // }
+  // }≥
 
   return (
     <>
@@ -25,8 +25,10 @@ export default async function Index() {
           <Link href="/">
             <Image src="/images/clear-logo.png" width={200} height={100} alt="MSP Diesel Solution Logo" />
           </Link>
-          {!user && (<Link href="/login" className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover self-end" >Login</Link>)}
           <div className="flex flex-row items-center gap-4">
+            {!user && (
+              <Link href="/login" className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover self-end" >Login</Link>
+            )}
             {user && admin && (
               <>
                 <Link href="/dashboard" className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover flex flex-row items-center">Dashboard</Link>
@@ -43,7 +45,7 @@ export default async function Index() {
           </div>
         </div>
       </nav>
-      <div className=" h-main mt-16 flex flex-row items-center justify-center space-x-16">
+      <div className=" h-main mt-16 flex flex-col lg:flex-row items-center justify-center space-x-16">
         {/* max width 495 */}
         <div className="w-full max-w-xl space-y-8">
           <h1 className="text-4xl font-bold">Expert Fuel Injector and Pump Repair/Reman Services!</h1>
@@ -56,7 +58,7 @@ export default async function Index() {
           </div>
           <p className="text-sm"><em>We offer 3 turn-around on testing and work service. Sign up for a account to get started!</em></p>
         </div>
-        <div>
+        <div className="mx-auto">
           <Image
             src="/images/msp_office.jpg"
             alt="MSP Diesel Solutions Main Building"
