@@ -46,7 +46,7 @@ export default async function Index() {
             <Link
               href="/login?sign-up=true"
               className="bg-main text-white rounded p-4"
-            >Create Account To Get Started</Link>
+            >Create Account To Get Started.</Link>
           </div>
           <p className="text-sm font-sans p-1"><em>We offer 3 turn-around on testing and work service. Sign up for a account to get started!</em></p>
         </div>
