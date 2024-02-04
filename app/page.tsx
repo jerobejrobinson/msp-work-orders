@@ -37,7 +37,7 @@ export default async function Index() {
           </div>
         </div>
       </nav>
-      <div className=" h-main mt-16 flex flex-col lg:flex-row items-center justify-center space-x-16">
+      <div className=" h-main mt-16 flex flex-col lg:flex-row items-center justify-center lg:space-x-16 p-4">
         {/* max width 495 */}
         <div className="w-full max-w-xl space-y-8">
           <h1 className="text-4xl font-bold">Expert Fuel Injector and Pump Repair/Reman Services!</h1>
@@ -50,24 +50,23 @@ export default async function Index() {
           </div>
           <p className="text-sm font-sans p-1"><em>We offer 3 turn-around on testing and work service. Sign up for a account to get started!</em></p>
         </div>
-        <div className="mx-auto">
+        <div className="w-full h-96 relative overflow-hidden">
           <Image
             src="/images/msp_office.jpg"
             alt="MSP Diesel Solutions Main Building"
-            width={512}
-            height={512}
-            className="mx-auto"
+            fill={true}
+            className="object-cover"
           />
         </div>
       </div>
       <div className=" h-main mt-16 flex flex-row items-center justify-center flex-wrap">
         <h2 className="text-4xl font-bold basis-full text-center">How It Works</h2>
-        <div className="mr-16">
+        <div className="w-full h-96 relative overflow-hidden max-w-2xl">
           <Image
             src="/images/msp_warehouse.jpg"
             alt="MSP Diesel Solutions Warehouse"
-            width={495}
-            height={512}
+            fill={true}
+            className="object-cover p-4"
           />
         </div>
         <div className="w-full max-w-xl space-y-4">
