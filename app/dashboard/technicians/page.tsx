@@ -5,13 +5,17 @@ export default async function Page() {
     const supabase = await createServerComponentClient({ cookies })
 
     const {error, data: techs} = await supabase.from('technician').select('*')
-
-    console.log(techs)
+    
     return (
-        <div className="p-4 mt-16 grid grid-cols-4 gap-4">
-            {techs?.map((tech) => (
-                <Technician tech={tech} key={tech.id} />
-            ))}
+        <div className="p-4 mt-16 space-y-4">
+            <div>
+                <button className="bg-gray-300 p-4 rounded">Add New Tech</button>
+            </div>
+            <div className="grid grid-cols-4 gap-4">
+                {techs?.map((tech) => (
+                    <Technician tech={tech} key={tech.id} />
+                ))}
+            </div>
         </div>
     )
 }
