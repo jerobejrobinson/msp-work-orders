@@ -2,46 +2,35 @@
 import Link from "next/link";
 import dayjs from "dayjs";
 import relativeTime from 'dayjs/plugin/relativeTime'
-import updateLocale from 'dayjs/plugin/updateLocale'
 import { useState, useEffect } from "react";
+
+function formatTime(seconds) {
+    let totalHours = Math.floor(seconds/(60*60))
+    seconds = seconds - (totalHours*60*60)
+
+    let totalMinutes = Math.floor(seconds/60)
+    seconds = seconds - (totalMinutes*60)
+
+    return `${totalHours} Hours ${totalMinutes} Mins ${seconds} Seconds`
+}
 
 export default function Task({task}) {
     dayjs.extend(relativeTime)
-    dayjs.extend(updateLocale)
-    dayjs.updateLocale('en', {
-    relativeTime: {
-        future: "in %s",
-        past: "%s ago",
-        s: 'a few seconds',
-        m: "a minute",
-        mm: "%d minutes",
-        h: "an hour",
-        hh: "%d hours ",
-        d: "a day",
-        dd: "%d days",
-        M: "a month",
-        MM: "%d months",
-        y: "a year",
-        yy: "%d years"
-    }
-    })
-    // const ended_at = ((new Date()).toISOString()).toLocaleString()
+
     const startTime = dayjs(task.started_at).format('DD/MM/YYYY h:mm:ss A')
 
-    const [time, setTime] = useState(dayjs().diff(dayjs(task.started_at)));
-    const [isRunning, setIsRunning] = useState(false);
+    const [time, setTime] = useState(formatTime(dayjs().diff(dayjs(task.started_at), 'second')));
 
     useEffect(() => {
         let intervalId;
-        if (isRunning) {
-          // setting time from 0 to 1 every 10 milisecond using javascript setInterval method
-          intervalId = setInterval(() => setTime(() => {
-            return dayjs().diff(dayjs(task.started_at))
-          }), 1000);
-        }
-        return () => clearInterval(intervalId);
-      }, [isRunning, time]);
+        intervalId = setInterval(() => setTime(() => {
 
+            // setting time from 0 to 1 every 10 milisecond using javascript setInterval method
+            return formatTime(dayjs().diff(dayjs(task.started_at), 'seconds'))
+        }), 1000);
+        
+        return () => clearInterval(intervalId);
+      }, [time]);
 
     return (
         <Link href={`/dashboard/${task.work_order.id}`}>
