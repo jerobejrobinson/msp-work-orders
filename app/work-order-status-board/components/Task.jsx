@@ -7,11 +7,14 @@ import { useState, useEffect } from "react";
 function formatTime(seconds) {
     let totalHours = Math.floor(seconds/(60*60))
     seconds = seconds - (totalHours*60*60)
-
+    
     let totalMinutes = Math.floor(seconds/60)
     seconds = seconds - (totalMinutes*60)
 
-    return `${totalHours} Hours ${totalMinutes} Mins ${seconds} Seconds`
+    const formatDigits = (digits) => {
+        return digits > 10 ? digits : `0${digits}`
+    }
+    return `${formatDigits(totalHours)}:${formatDigits(totalMinutes)}:${formatDigits(seconds)}`
 }
 
 export default function Task({task}) {
