@@ -12,7 +12,7 @@ function formatTime(seconds) {
     seconds = seconds - (totalMinutes*60)
 
     const formatDigits = (digits) => {
-        return digits > 10 ? digits : `0${digits}`
+        return digits >= 10 ? digits : `0${digits}`
     }
     return `${formatDigits(totalHours)}:${formatDigits(totalMinutes)}:${formatDigits(seconds)}`
 }
