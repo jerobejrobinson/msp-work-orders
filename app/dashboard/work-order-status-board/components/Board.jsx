@@ -13,6 +13,7 @@ async function getActiveWorkOrder(setFunction, supabase) {
 export default function Board() {
     const supabase = createClientComponentClient()
     const [tasks, setTasks] = useState(null)
+
     useEffect(() => {
         getActiveWorkOrder(setTasks, supabase)
     }, [tasks])

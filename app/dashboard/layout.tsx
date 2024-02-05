@@ -24,6 +24,9 @@ export default async function DashboardLayout({ children, }: {children: React.Re
                         <Link href="/dashboard" className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover flex flex-row items-center">
                             Dashboard
                         </Link>
+                        <Link href="/dashboard/work-order-status-board" className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover flex flex-row items-center">
+                            Current Jobs
+                        </Link>
                         <LogoutButton />
                     </div>
                 </div>
