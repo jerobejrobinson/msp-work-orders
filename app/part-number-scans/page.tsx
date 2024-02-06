@@ -2,6 +2,7 @@ import Form from './components/Form'
 import Checkbox from './components/Checkbox'
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 export const dynamic = 'force-dynamic'
@@ -10,14 +11,19 @@ export const dynamic = 'force-dynamic'
 export default async function Page() {
     dayjs.extend(relativeTime)
     const supabase = await createServerComponentClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
+    const { data: admin  } = await supabase.from('admin').select('user_id, first_name').eq('user_id', user?.id).limit(1).single()
+
+    if(!admin) {
+        redirect('/')
+    }
 
     const {error, data} = await supabase.from('temp_serial_number').select('*')
-
-    
 
     if(error) {
         console.log(error)
     }
+    
     return (
         <section className='h-screen'>
             <div className='h-1/5'>

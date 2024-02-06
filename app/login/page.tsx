@@ -59,14 +59,9 @@ export default function Login() {
   }
 
   return (
-    <div className="h-main w-full bg-background flex flex-col items-center relative mt-16">
+    <div className="h-screen w-full bg-background flex flex-col items-center justify-center relative">
       <Toaster/>
-      <Image 
-        src="/images/clear-logo.png"
-        width={333}
-        height={166}
-        alt="MSP Diesel Solution Logo"
-      />
+      
       {view === 'check-email' ? (
         <p className="text-center text-foreground">
           Check <span className="font-bold">{email}</span> to continue signing
@@ -74,62 +69,71 @@ export default function Login() {
         </p>
       ) : (
         <form
-          className="flex-1 flex flex-col w-full gap-2 text-foreground max-w-xl"
+          className="w-full text-foreground max-w-xl bg-white p-8"
           onSubmit={view === 'sign-in' ? handleSignIn : handleSignUp}
         >
-          <label className="text-md" htmlFor="email">
-            Email
-          </label>
-          <input
-            className="rounded-md px-4 py-2 bg-inherit border mb-6"
-            name="email"
-            onChange={(e) => setEmail(e.target.value)}
-            value={email}
-            placeholder="you@example.com"
+          <Image 
+            src="/images/clear-logo.png"
+            width={333}
+            height={166}
+            alt="MSP Diesel Solution Logo"
+            className='mx-auto -translate-x-4'
           />
-          <label className="text-md" htmlFor="password">
-            Password
-          </label>
-          <input
-            className="rounded-md px-4 py-2 bg-inherit border mb-6"
-            type="password"
-            name="password"
-            onChange={(e) => setPassword(e.target.value)}
-            value={password}
-            placeholder="••••••••"
-          />
-          {view === 'sign-in' && (
-            <>
-              <button className="bg-main rounded px-4 py-2 text-white mb-6">
-                Sign In
-              </button>
-              <p className="text-sm text-center">
-                Don't have an account?
-                <button
-                  className="ml-1 underline"
-                  onClick={() => setView('sign-up')}
-                >
-                  Sign Up Now
+          <div className='flex-1 flex flex-col gap-2'>
+            <label className="text-md" htmlFor="email">
+              Email
+            </label>
+            <input
+              className="rounded-md px-4 py-2 bg-inherit border mb-6"
+              name="email"
+              onChange={(e) => setEmail(e.target.value)}
+              value={email}
+              placeholder="you@example.com"
+            />
+            <label className="text-md" htmlFor="password">
+              Password
+            </label>
+            <input
+              className="rounded-md px-4 py-2 bg-inherit border mb-6"
+              type="password"
+              name="password"
+              onChange={(e) => setPassword(e.target.value)}
+              value={password}
+              placeholder="••••••••"
+            />
+            {view === 'sign-in' && (
+              <>
+                <button className="bg-main rounded px-4 py-2 text-white mb-6">
+                  Sign In
                 </button>
-              </p>
-            </>
-          )}
-          {view === 'sign-up' && (
-            <>
-              <button className="bg-mainT20 rounded px-4 py-2 text-white mb-6">
-                Sign Up
-              </button>
-              <p className="text-sm text-center">
-                Already have an account?
-                <button
-                  className="ml-1 underline"
-                  onClick={() => setView('sign-in')}
-                >
-                  Sign In Now
+                <p className="text-sm text-center">
+                  Don't have an account?
+                  <button
+                    className="ml-1 p-4 bg-green-300 rounded text-white"
+                    onClick={() => setView('sign-up')}
+                  >
+                    Sign Up Now
+                  </button>
+                </p>
+              </>
+            )}
+            {view === 'sign-up' && (
+              <>
+                <button className="bg-green-300 rounded px-4 py-2 text-white mb-6">
+                  Sign Up
                 </button>
-              </p>
-            </>
-          )}
+                <p className="text-sm text-center">
+                  Already have an account?
+                  <button
+                    className="ml-1 p-4 bg-main rounded text-white"
+                    onClick={() => setView('sign-in')}
+                  >
+                    Sign In Now
+                  </button>
+                </p>
+              </>
+            )}
+          </div>
         </form>
       )}
     </div>

@@ -51,12 +51,12 @@ export default async function Index() {
           </div>
           <p className="text-sm font-sans p-1"><em>We offer 3 turn-around on testing and work service. Sign up for a account to get started!</em></p>
         </div>
-        <div className="w-full h-96 relative overflow-hidden">
+        <div className="w-full max-w-xl h-96 relative overflow-hidden">
           <Image
             src="/images/msp_office.jpg"
             alt="MSP Diesel Solutions Main Building"
             fill={true}
-            className="object-cover"
+            className="object-contain"
           />
         </div>
       </div>
@@ -80,7 +80,7 @@ export default async function Index() {
           </ol>
         </div>
         <div className="basis-full text-center">
-          <p className="max-w-3xl mx-auto">Don't let engine troubles hold you back. Unlock the full potential of your vehicle with our expert fuel injector and pump remanufacturing services. Join countless satisfied customers who have experienced the exceptional results we deliver.</p>
+          <p className="max-w-4xl mx-auto">Don't let engine troubles hold you back. <br /> Unlock the full potential of your engine with our expert fuel injector and pump remanufacturing services. <br />Join countless satisfied customers who have experienced the exceptional results we deliver.</p>
         </div>
       </div>
       <footer className="bg-[#1c1a33] text-white text-center p-4 mt-20">
