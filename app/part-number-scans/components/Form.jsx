@@ -29,7 +29,7 @@ export default function Form() {
             <input
                 ref={inputRef}
                 type="text"
-                className="border w-96" 
+                className="border w-96 font-sans" 
                 autoFocus 
                 onChange={(e) => {
                     if(e.target.value.length == 26) {
@@ -41,6 +41,7 @@ export default function Form() {
                     }
                 }}
             />
+            <p className="text-sm font-sans text-red-400">* needs PDF417 scanner to work</p>
         </form>
     )
 }
