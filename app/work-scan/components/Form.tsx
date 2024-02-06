@@ -68,7 +68,7 @@ export default function Form() {
                     <option value="second-test">Second Test</option>
                 </select>
             </div>
-            {block ? (<button className={`bg-[#e8523d] w-full h-16 font-bold text-white`} ref={submitRef} onClick={() => setBlock(false)}>Submit Entry</button>) : (<button className={`bg-[#e8523d] w-full h-16 font-bold text-white flex flex-row justify-center items-center`} disabled><LoadingAnimation /></button>)}
+            {block ? (<button className={`bg-[#e8523d] w-full h-16 font-bold text-white`} ref={submitRef} onClick={() => setBlock(false)}>Submit Entry</button>) : (<button className={`bg-[#e8523d] w-full h-16 font-bold text-white flex flex-row justify-center items-center`}><LoadingAnimation /></button>)}
         </form>
     )
 }

@@ -23,6 +23,13 @@ export default function Board() {
             <div>Loading Active Work Orders</div>
         )
     }
+    if(tasks.length == 0) {
+        return (
+            <div className="bg-white max-w-7xl shadow rounded mx-auto flex flex-col lg:flex-row gap-4 p-4">
+                <p>No active jobs</p>
+            </div> 
+        )
+    }
     return (
         <div className="bg-white max-w-7xl shadow rounded mx-auto flex flex-col lg:flex-row gap-4 p-4">
             {tasks.map((task) => (
