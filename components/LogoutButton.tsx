@@ -21,7 +21,7 @@ export default function LogoutButton() {
     <>
       <Toaster />
       <button
-        className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover"
+        className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover bg-mainT20"
         onClick={signOut}
       >
         Logout
