@@ -1,5 +1,0 @@
-00842468920CL6300028334723
-- get text input
-- modify input
-- upload to supabase
-- export serial codes
