@@ -1,47 +1,39 @@
-'use client'
-import { toast, Toaster } from "react-hot-toast"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import { useRef, useState } from "react"
+import Form from './components/Form'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
 
 export default async function Page() {
-    const supabase = await createClientComponentClient()
+    dayjs.extend(relativeTime)
+    const supabase = await createServerComponentClient({ cookies })
 
-    // const inputRef = useRef<HTMLInputElement>(null)
+    const {error, data} = await supabase.from('temp_serial_number').select('*')
 
-    async function handleAutoSubmit(str: string, pn: string) {
-        const {error} = await supabase.from('work_orders').insert({serial_number: str, pn: pn})
-
+    if(error) {
         console.log(error)
-        if(error) {
-            toast.error(error?.message)
-        }
-
-        
-        toast.success('Serial number submitted')
-        
     }
-    
+    console.log(data)
     return (
-        <section className="flex flex-col justify-center items-center h-screen">
-            <Toaster />
-            <form className="flex flex-col border-2 p-4">
-                <label htmlFor="">Scan Barcode</label>
-                <input
-                    // ref={inputRef}
-                    type="text"
-                    className="border w-96" 
-                    autoFocus 
-                    onChange={(e) => {
-                        if(e.target.value.length == 26) {
-                            let partNumber = e.target.value.slice(0,11)
-                            let serialNumber = e.target.value.slice(16,21)
-                            handleAutoSubmit(serialNumber, partNumber)
-                            e.target.value = ''
-                            e.target.focus()
-                        }
-                    }}
-                />
-            </form>
+        <section>
+            <div className="flex flex-col justify-center h-24 w-full">
+                <Form />
+            </div>
+                {/* grid header */}
+            <div className='grid grid-cols-4 bg-sky-300 p-4'>
+                <p>Date Added</p>
+                <p>Part Number</p>
+                <p>Serial Number</p>
+                <p>Used</p>
+            </div>
+            {data?.map((row, index) => (
+                <div className={`grid grid-cols-4 p-4 ${index % 2 == 0 ? 'bg-gray-100' : 'bg-gray-300'}`} key={row.id}>
+                    <p>{dayjs(row.created_at).format('DD/MM/YYYY h:mm:ss A')}</p>
+                    <p>{row.part_number}</p>
+                    <p>{row.serial_number}</p>
+                    <p>{row.used ? 'used' : 'available'}</p>
+                </div>
+            ))}
         </section>
     )
 }
