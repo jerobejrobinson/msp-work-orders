@@ -2,6 +2,7 @@ import { createServerComponentClient, createServerActionClient } from '@supabase
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import ProfileForm from '@/components/ProfileForm'
+export const dynamic = 'force-dynamic'
 // import Metadata from 'next'
 
 // export const metadata: Metadata = {

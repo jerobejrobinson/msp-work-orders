@@ -8,9 +8,7 @@ import WorkOrder from "@/components/WorkOrderComponent"
 import WorkOrderNotes from "@/components/WorkOrderNotes"
 import TestResults from "@/components/TestResults"
 import Images from "@/components/Images"
-import {renderToFile} from '@react-pdf/renderer'
-import WorkOrderDownloadLink from '@/components/WorkOrderDownloadLink'
-import WorkOrderForm from "@/components/WorkOrderForm"
+export const dynamic = 'force-dynamic'
 
 interface TestResult {
     id: string,

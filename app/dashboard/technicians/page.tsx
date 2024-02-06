@@ -1,11 +1,13 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 import Technician from './components/Technician'
+export const dynamic = 'force-dynamic'
+
 export default async function Page() {
     const supabase = await createServerComponentClient({ cookies })
 
     const {error, data: techs} = await supabase.from('technician').select('*')
-    
+
     return (
         <div className="p-4 mt-16 space-y-4">
             <div>

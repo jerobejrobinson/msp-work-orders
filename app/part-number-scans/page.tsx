@@ -3,7 +3,7 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-
+export const dynamic = 'force-dynamic'
 export default async function Page() {
     dayjs.extend(relativeTime)
     const supabase = await createServerComponentClient({ cookies })

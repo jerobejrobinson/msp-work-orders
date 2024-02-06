@@ -8,7 +8,7 @@ import WorkOrder from "@/components/WorkOrderComponent"
 import WorkOrderNotes from "@/components/WorkOrderNotes"
 import TestResults from "@/components/TestResults"
 import Images from "@/components/Images"
-
+export const dynamic = 'force-dynamic'
 interface TestResult {
     id: string,
     created_at: Date,

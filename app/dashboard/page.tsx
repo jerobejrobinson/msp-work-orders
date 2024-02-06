@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import WorkOrderTable from "@/components/WorkOrderTable"
 import BillingChart from "@/components/BIllingChart"
 export const revalidate = 0
+export const dynamic = 'force-dynamic'
 
 export default async function Page() {
     const supabase = await createServerComponentClient({ cookies })

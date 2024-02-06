@@ -3,7 +3,7 @@ import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 import Link from "next/link"
 import { redirect, notFound } from "next/navigation"
-
+export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export default async function WorkOrderPage() {
