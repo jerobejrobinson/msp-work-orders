@@ -17,7 +17,7 @@ const nextConfig = {
         protocol: 'http',
         hostname: 'bwipjs-api.metafloor.com',
         port: '',
-        pathname: '',
+        pathname: '/**',
       },
     ],
   },
