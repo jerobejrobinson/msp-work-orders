@@ -11,7 +11,7 @@ export default async function Page() {
             <div>
                 <button className="bg-gray-300 p-4 rounded">Add New Tech</button>
             </div>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                 {techs?.map((tech) => (
                     <Technician tech={tech} key={tech.id} />
                 ))}
