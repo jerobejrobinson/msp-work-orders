@@ -30,7 +30,7 @@ export default function Task({task}) {
     const supabase = createClientComponentClient()
 
     dayjs.extend(relativeTime)
-    const startTime = dayjs(task.started_at).format('DD/MM/YYYY h:mm:ss A')
+    const startTime = dayjs(task.started_at).format('MM/DD/YYYY h:mm:ss A')
     const [time, setTime] = useState(formatTime(dayjs().diff(dayjs(task.started_at), 'second')));
 
     useEffect(() => {

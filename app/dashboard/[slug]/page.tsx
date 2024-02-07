@@ -138,7 +138,7 @@ export default async function Order({params}: { params: { slug: string }}) {
                             </div>
                             <div className="grid grid-cols-2 items-center">
                                 <p className="font-bold p-2 bg-[#fde4c6]">Time Started</p>
-                                <p className="p-2 bg-white">{dayjs(task.started_at).format('DD/MM/YYYY h:mm:ss A')}</p>
+                                <p className="p-2 bg-white">{dayjs(task.started_at).format('MM/DD/YYYY h:mm:ss A')}</p>
                             </div>
                             <div className="grid grid-cols-2 items-center">
                                 <p className="font-bold p-2 bg-[#fde4c6]">Technician</p>
