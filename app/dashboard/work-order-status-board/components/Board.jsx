@@ -53,8 +53,6 @@ export default function Board() {
         realtime(supabase, setTasks)
         getActiveWorkOrder(supabase, setTasks)
     }, [])
-
-    console.log('TASKS', tasks)
     
     if(tasks.length == 0) {
         return (

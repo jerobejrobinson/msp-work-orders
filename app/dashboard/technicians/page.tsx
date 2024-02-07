@@ -1,6 +1,7 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 import Technician from './components/Technician'
+import AddTechBtn from './components/AddTechBtn'
 export const dynamic = 'force-dynamic'
 
 export default async function Page() {
@@ -11,7 +12,7 @@ export default async function Page() {
     return (
         <div className="p-4 mt-16 space-y-4">
             <div>
-                <button className="bg-gray-300 p-4 rounded">Add New Tech</button>
+                <AddTechBtn />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                 {techs?.map((tech) => (
