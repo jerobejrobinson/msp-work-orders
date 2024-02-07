@@ -1,13 +1,9 @@
-import { createServerComponentClient, createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import ProfileForm from '@/components/ProfileForm'
 export const dynamic = 'force-dynamic'
-// import Metadata from 'next'
 
-// export const metadata: Metadata = {
-//   title: 'Profile | MSP Diesel Solutions Work Order Tracker'
-// }
 export default async function ProfileRoute() {
     const supabase = createServerComponentClient({ cookies })
     const { data: { user } } = await supabase.auth.getUser() 
@@ -27,4 +23,4 @@ export default async function ProfileRoute() {
         <p>{CustomerData.phone}</p>
       </div>
     )
-} 
+}
