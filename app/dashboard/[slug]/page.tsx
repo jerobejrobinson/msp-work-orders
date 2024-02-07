@@ -8,6 +8,8 @@ import WorkOrder from "@/components/WorkOrderComponent"
 import WorkOrderNotes from "@/components/WorkOrderNotes"
 import TestResults from "@/components/TestResults"
 import Images from "@/components/Images"
+import dayjs from "dayjs"
+import relativeTime from 'dayjs/plugin/relativeTime'
 export const dynamic = 'force-dynamic'
 
 interface TestResult {
@@ -47,41 +49,44 @@ interface Image {
     type: string
 }
 
+interface Task {
+    id: number, 
+    started_at: Date, 
+    ended_at: Date, 
+    total_time: string, 
+    is_completed: boolean, 
+    task_type: string, 
+    technician: {
+        name: string
+    }
+}
 export const revalidate = 0
 
 export default async function Order({params}: { params: { slug: string }}) {
-
+    dayjs.extend(relativeTime)
     const supabase = createServerComponentClient({ cookies })
-
     const { data: { user }} = await supabase.auth.getUser()
-    
-    if(!user) {
-        redirect('/login')
-    }
-
     const { data: admin  } = await supabase.from('admin').select('user_id, id').eq('user_id', user?.id).limit(1).single()
-
-    if(!admin) {
-        redirect('/')
-    }
-
     const { data: wo } = await supabase.from('work_order').select().eq('id', params.slug).limit(1).single()
 
     if(!wo) {
         notFound()
     }
+
     const { data: test_results, error: test_resultsError }= await supabase.from('test_result').select(`id, created_at, note, link, admin ( first_name )`).eq('wo_id', wo.id).returns<[TestResult]>()
     const { data: billing, error: billingError } = await supabase.from('billing').select('id, created_at, notes, amount, link, approved, approved_at, invoice, admin ( first_name )').eq('wo_id', wo.id).limit(1).returns<[Billing]>().single()
     const { data: notes }= await supabase.from('note').select(`id, created_at, note, customer ( first_name ), admin ( first_name )`).eq('wo_id', wo.id).returns<[Note]>()
     const { data: images, error: imagesError } = await supabase.from('image').select('*').eq('wo_id', wo.id).returns<[Image]>()
-
+    const { data: tasks, error: taskError } = await supabase.from('work_order_task').select(`id, started_at, ended_at, total_time, is_completed, task_type, technician(name)`).eq('work_order_id', wo.id).returns<[Task]>()
     const { data: customer, error: customerError } = await supabase.from('customer').select('*').eq('id', wo.customer_id).limit(1).single()
 
+    console.log(tasks)
     return (
         <div className="w-full bg-background flex flex-col items-center relative mt-16">
             <AdminActions wo={wo} testRes={test_results} billing={billing} admin={admin} notes={notes}  images={images}/>
             <ProgressBar wo={wo} test_results={test_results} billing={billing} />
             <WorkOrder wo={wo} />
+            {/* Customer Information  */}
             <div className="w-full max-w-7xl py-8">
                 <p className="text-xl font-bold">Customer Information</p>
                 <div className="grid grid-cols-4 gap-4 p-8 bg-white border rounded">
@@ -115,6 +120,40 @@ export default async function Order({params}: { params: { slug: string }}) {
                     </div>
                 </div>
             </div>
+            {/* End Customer Information */}
+            {/* Start Work Order Tasks*/}
+            <div className="w-full max-w-7xl py-8">
+                <p className="text-xl font-bold">Jobs</p>
+                <div className="grid grid-cols-3 gap-4 p-8 bg-white border rounded">
+                    {/* {tasks?.length == 0 && <p>No Jobs Available</p>} */}
+                    {tasks?.map((task) => (
+                        <div className={`rounded shadow font-sans ${task.is_completed ? "border" : "animate-pulse border-[#e8523d] border-2" }`}>
+                            <div className="grid grid-cols-2 items-center p-2">
+                                <p className="font-bold">Task</p>
+                                <p>{task.task_type}</p>
+                            </div>
+                            <div className="grid grid-cols-2 items-center p-2">
+                                <p className="font-bold">Time Started</p>
+                                <p>{dayjs(task.started_at).format('DD/MM/YYYY h:mm:ss A')}</p>
+                            </div>
+                            <div className="grid grid-cols-2 items-center p-2">
+                                <p className="font-bold">Technician</p>
+                                <p>{task.technician.name}</p>
+                            </div>
+                            <div className="grid grid-cols-2 items-center p-2">
+                                <p className="font-bold">Total Time</p>
+                                <p>{task.total_time ? task.total_time : 'On Going'}</p>
+                            </div>
+                            <div className="grid grid-cols-2 items-center p-2">
+                                <p></p>
+                            </div>
+                            {/* <p>is completed? {tas}</p> */}
+                        </div>
+                    ))}
+                    
+                </div>
+            </div>
+            {/* End Work Order Tasks*/}
             <WorkOrderNotes notes={notes} />
 
             {/* @ts-expect-error Server Component */}

@@ -82,7 +82,7 @@ export default function Task({task}) {
                 <div className="bg-[#fde4c6] col-span-full p-2">
                     <p className="font-bold">Task Start Time</p>
                     <p>{startTime}</p>
-                    <p className="font-bold">Time Spent On Ticket</p>
+                    <p className="font-bold">Time Spent On Task</p>
                     <p>{time}</p>
                 </div>
             </div>
