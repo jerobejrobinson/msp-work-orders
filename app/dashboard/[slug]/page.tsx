@@ -77,7 +77,7 @@ export default async function Order({params}: { params: { slug: string }}) {
     const { data: billing, error: billingError } = await supabase.from('billing').select('id, created_at, notes, amount, link, approved, approved_at, invoice, admin ( first_name )').eq('wo_id', wo.id).limit(1).returns<[Billing]>().single()
     const { data: notes }= await supabase.from('note').select(`id, created_at, note, customer ( first_name ), admin ( first_name )`).eq('wo_id', wo.id).returns<[Note]>()
     const { data: images, error: imagesError } = await supabase.from('image').select('*').eq('wo_id', wo.id).returns<[Image]>()
-    const { data: tasks, error: taskError } = await supabase.from('work_order_task').select(`id, started_at, ended_at, total_time, is_completed, task_type, technician(name)`).eq('work_order_id', wo.id).returns<[Task]>()
+    const { data: tasks, error: taskError } = await supabase.from('work_order_task').select(`id, started_at, ended_at, total_time, is_completed, task_type, technician(name)`).eq('work_order_id', wo.id).returns<[Task] | []>()
     const { data: customer, error: customerError } = await supabase.from('customer').select('*').eq('id', wo.customer_id).limit(1).single()
 
     console.log(tasks)
@@ -123,9 +123,13 @@ export default async function Order({params}: { params: { slug: string }}) {
             {/* End Customer Information */}
             {/* Start Work Order Tasks*/}
             <div className="w-full max-w-7xl py-8">
-                <p className="text-xl font-bold">Jobs</p>
+                <p className="text-xl font-bold">Tasks</p>
                 <div className="grid grid-cols-3 gap-4 p-8 bg-white border rounded">
-                    {/* {tasks?.length == 0 && <p>No Jobs Available</p>} */}
+                    {tasks?.length == 0 && (
+                        <div className=" italic font-light text-3xl flex flex-row items-center">
+                            No Tasks Available
+                        </div>
+                    )}
                     {tasks?.map((task) => (
                         <div className={`rounded shadow font-sans ${task.is_completed ? "border" : "animate-pulse border-[#e8523d] border-2" }`}>
                             <div className="grid grid-cols-2 items-center p-2">
