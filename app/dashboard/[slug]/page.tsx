@@ -131,25 +131,22 @@ export default async function Order({params}: { params: { slug: string }}) {
                         </div>
                     )}
                     {tasks?.map((task) => (
-                        <div className={`rounded shadow font-sans ${task.is_completed ? "border" : "animate-pulse border-[#e8523d] border-2" }`}>
-                            <div className="grid grid-cols-2 items-center p-2">
-                                <p className="font-bold">Task</p>
-                                <p>{task.task_type}</p>
+                        <div className={`rounded shadow font-sans ${task.is_completed ? "border" : "border-[#e8523d] border-2" }`}>
+                            <div className="grid grid-cols-2 items-center">
+                                <p className="font-bold  p-2 bg-[#fde4c6]">Task</p>
+                                <p className=" p-2 bg-white">{task.task_type}</p>
                             </div>
-                            <div className="grid grid-cols-2 items-center p-2">
-                                <p className="font-bold">Time Started</p>
-                                <p>{dayjs(task.started_at).format('DD/MM/YYYY h:mm:ss A')}</p>
+                            <div className="grid grid-cols-2 items-center">
+                                <p className="font-bold p-2 bg-[#fde4c6]">Time Started</p>
+                                <p className="p-2 bg-white">{dayjs(task.started_at).format('DD/MM/YYYY h:mm:ss A')}</p>
                             </div>
-                            <div className="grid grid-cols-2 items-center p-2">
-                                <p className="font-bold">Technician</p>
-                                <p>{task.technician.name}</p>
+                            <div className="grid grid-cols-2 items-center">
+                                <p className="font-bold p-2 bg-[#fde4c6]">Technician</p>
+                                <p className="p-2 bg-white">{task.technician.name}</p>
                             </div>
-                            <div className="grid grid-cols-2 items-center p-2">
-                                <p className="font-bold">Total Time</p>
-                                <p>{task.total_time ? task.total_time : 'On Going'}</p>
-                            </div>
-                            <div className="grid grid-cols-2 items-center p-2">
-                                <p></p>
+                            <div className="grid grid-cols-2 items-center">
+                                <p className="font-bold p-2 bg-[#fde4c6]">Total Time</p>
+                                <p className="p-2 bg-white animate-pulse">{task.total_time ? task.total_time : 'On Going'}</p>
                             </div>
                             {/* <p>is completed? {tas}</p> */}
                         </div>

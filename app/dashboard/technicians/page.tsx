@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 export default async function Page() {
     const supabase = await createServerComponentClient({ cookies })
 
-    const {error, data: techs} = await supabase.from('technician').select('*')
+    const {error, data: techs} = await supabase.from('technician').select('*').eq('is_active', true)
 
     return (
         <div className="p-4 mt-16 space-y-4">

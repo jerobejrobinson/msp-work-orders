@@ -8,6 +8,7 @@ interface Technician {
     id: number
     number: number
     name: string
+    is_active: boolean
 }
 interface WorkOrder {
     id: string
@@ -56,11 +57,13 @@ export async function submitForm(formData: FormData): Promise<FormSubmit | undef
     }
 
     // Get Technician Badge ID
-    const { error: technicianError, data: technician } = await supabase.from('technician').select('id, number, name').eq('number', Number(rawFormData.badge)).single<Technician>()
+    const { error: technicianError, data: technician } = await supabase.from('technician').select('id, number, name, is_active').eq('number', Number(rawFormData.badge)).single<Technician>()
     if(technicianError) {
         return {error: supabaseErrorCodes(technicianError, 'Technician Error'), status: null}
     }
-
+    if(!technician.is_active) {
+        return {error: 'disabled user', status: null}
+    }
     // Get Work Order ID
     const { error: workOrderError, data: workOrder } = await supabase.from('work_order').select('id, number').eq('number', rawFormData.number).single<WorkOrder>()
     if(workOrderError) {
